@@ -7,8 +7,11 @@
     '/' -> Home Page
     '/login' -> authenticate yourself with server
     '/register' -> create an account
-    '/customers' -> returns a list of customers by name
-    -> '/add' -> creates a new customer in db
+    '/customers' -> returns a list of all customers by name
+      -> '/:id' -> returns customer with provided id
+      -> DELETE '/:id' deletes customer based upon ID
+      -> PATCH '/merge/:id1/:id2' merge customers based up on ID
+      -> '/add' -> creates a new customer in db
 
 */
 
