@@ -37,4 +37,16 @@ router.delete('/:id', function(req, res, next) {
 
     res.json({status: 'success', data: `Successfully removed ${removedCustomer} from database.`})
 })
+
+/* update a note by id */
+router.post('/:id', function(req, res, next) {
+    console.log(req.body)
+tempStorage[req.params.id] = req.body
+
+    res.json({status: 'success', data: req.body })
+})
+/*  */
+/*  */
+/*  */
+/*  */
 module.exports = router;

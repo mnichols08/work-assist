@@ -33,4 +33,11 @@ router.delete('/:id', function(req, res, next) {
 
     res.json({status: 'success', data: `Successfully removed ${removedCustomer.name} from database.`})
 })
+
+/* update customer by id */
+router.patch('/:id', function(req, res, next) {
+    customers[req.params.id] = post = req.body
+    res.json({ status: 'success', data: post}) 
+})
+
 module.exports = router;
