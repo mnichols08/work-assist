@@ -2,11 +2,13 @@ var express = require('express');
 var mongoose = require('mongoose');
 var router = express.Router();
 
-const { index } = require('../controls/notes.controller')
 const Note = require('../models/note.model')
 const Customer = require('../models/customer.model')
 
-router.get('/', index)
+router.get('/', async function(req, res){
+  const notes = await Note.find({})
+  res.json(notes)
+})
 
 router.get('/:id', async function(req, res){
   const { id } = req.params
