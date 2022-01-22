@@ -25,7 +25,7 @@ var logger = require('morgan');
 var authRouter = require('./routes/auth');
 var notesRouter = require('./routes/notes');
 var customersRouter = require('./routes/customers');
-
+const Customer = require('./models/customer.model')
 var app = express();
 require('dotenv').config();
 const CLIENT_API = process.env.CLIENT_API;
@@ -79,9 +79,30 @@ app.delete('/notes/:id', async function(req, res){
   }
 })
 
-app.post('/notes', async function(req, res){
+app.post('/notes/:id', async function(req, res){
+  const customer = await Customer.findById(req.params.id)
   const Note = require('./models/note.model')
   const note = new Note(req.body)
+  customer.notes.push(note)
+  note.origin = customer._id
+  await customer.save()
+  await note.save()
+  res.json({status: 'success', method: 'create note', data: note})
+})
+
+app.post('/notes/', async function(req, res){
+  let customer
+  if (!await Customer.findOne({name: 'Cash Account'})) {
+    customer = new Customer({name: 'Cash Account'})
+  } else customer = await Customer.findOne({name: 'Cash Account'})
+  
+   
+
+  const Note = require('./models/note.model')
+  const note = new Note(req.body)
+  note.origin = customer._id
+  customer.notes.push(note)
+  await customer.save()
   await note.save()
   res.json({status: 'success', method: 'create note', data: note})
 })
@@ -112,7 +133,7 @@ app.get('/customers', async function(req, res){
 })
 
 app.post('/customers', async function(req, res){
-  const Customer = require('./models/customer.model')
+  
   const customer = new Customer(req.body)
   await customer.save()
   res.json({status: 'success', method: 'create customer', data: customer})
