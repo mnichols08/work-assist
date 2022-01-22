@@ -94,7 +94,7 @@ app.patch('/notes/:id', async function(req, res){
     res.json({status: 'failure', data: `not found.`})
   } else {
     await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
-    res.json({status: 'success', method: "update note", data: note})
+    res.json({status: 'success', method: "update note", data: await Note.findById(id)})
   }
 })
 
