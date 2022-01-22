@@ -36,8 +36,8 @@ router.delete('/:id', function(req, res, next) {
 
 /* update customer by id */
 router.patch('/:id', function(req, res, next) {
-    customers[req.params.id] = post = req.body
-    res.json({ status: 'success', data: post}) 
+    customers[req.params.id] = req.body
+    res.json({ status: 'success', data: req.body}) 
 })
 
 module.exports = router;

@@ -62,30 +62,104 @@ app.get('/notes/:id', async function(req, res){
   const Note = require('./models/note.model')
   const { id } = req.params
   const note = await Note.findById(id)
-  console.log(note)
   if (!note) {
-    res.json({status: 'failure', data: `not found.`})
+    res.json({status: 'failure', method: 'read note', data: `not found.`})
   } else res.json(note)
 })
 
 app.delete('/notes/:id', async function(req, res){
   const Note = require('./models/note.model')
   const { id } = req.params
-  await Note.findByIdAndDelete(id)
-  res.json({status: 'success', data: `Removed note with id of ${id}`})
+  const note = await Note.findById(id)
+  if (!note) {
+    res.json({status: 'failure', data: `not found.`})
+  } else {
+    await Note.findByIdAndDelete(id)
+    res.json({status: 'success', method: 'delete note', data: note})
+  }
 })
 
-app.post('/notes/add', async function(req, res){
+app.post('/notes', async function(req, res){
   const Note = require('./models/note.model')
   const note = new Note(req.body)
   await note.save()
-  res.json(note)
+  res.json({status: 'success', method: 'create note', data: note})
 })
 
+app.patch('/notes/:id', async function(req, res){
+  const Note = require('./models/note.model')
+  const { id } = req.params
+  const note = await Note.findById(id)
+  if (!note) {
+    res.json({status: 'failure', data: `not found.`})
+  } else {
+    await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
+    res.json({status: 'success', method: "update note", data: note})
+  }
+})
+
+app.delete('/notes/', async function(req, res){
+  const Note = require('./models/note.model')
+  const notes = await Note.find({})
+  await Note.deleteMany()
+  res.json({status: 'success', method: "delete all notes", data: notes})
+})
+
+app.get('/customers', async function(req, res){
+  const Customer = require('./models/customer.model')
+  const customers = await Customer.find({})
+  res.json(customers)
+})
+
+app.post('/customers', async function(req, res){
+  const Customer = require('./models/customer.model')
+  const customer = new Customer(req.body)
+  await customer.save()
+  res.json({status: 'success', method: 'create customer', data: customer})
+})
+
+app.get('/customers/:id', async function(req, res){
+  const Customer = require('./models/customer.model')
+  const { id } = req.params
+  const customer = await Customer.findById(id)
+  if (!customer) {
+    res.json({status: 'failure', method: 'get customer', data: `not found.`})
+  } else res.json(customer)
+})
+
+app.patch('/customers/:id', async function(req, res){
+  const Customer = require('./models/customer.model')
+  const { id } = req.params
+  if (!await Customer.findById(id)) {
+    res.json({status: 'failure', data: `not found.`})
+  } else {
+    await Customer.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
+    res.json({status: 'success', method: "update customer", data: await Customer.findById(id)})
+  }
+})
+
+app.delete('/customers/:id', async function(req, res){
+  const Customer = require('./models/customer.model')
+  const { id } = req.params
+  const customer = await Customer.findById(id)
+  if (!customer) {
+    res.json({status: 'failure', data: `not found.`})
+  } else {
+    await Customer.findByIdAndDelete(id)
+    res.json({status: 'success', method: 'delete customer', data: customer})
+  }
+})
+
+app.delete('/customers', async function(req, res){
+  const Customer = require('./models/customer.model')
+  const customers = await Customer.find({})
+  await Customer.deleteMany()
+  res.json({status: 'success', method: "delete all customers", data: customers})
+})
 
 app.use('/users', authRouter);
 //app.use('/notes', notesRouter);
-app.use('/customers', customersRouter);
+//app.use('/customers', customersRouter);
 
 function checkLoggedIn(req, res, next) { 
   const isLoggedIn = req.headers.authkey === CLIENT_API
