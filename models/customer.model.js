@@ -1,26 +1,19 @@
 const mongoose = require('mongoose');
 const Note = require('./note.model');
-const Schema = mongoose.Schema;
 
-const CustomerSchema = new Schema({
-    name: String,
-    phone: String,
+const schema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    phone: Number,
     notes: [
         {
-            type: Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: 'Note'
         }
     ]
-});
-
-CustomerSchema.post('findOneAndDelete', async function(doc){
-    if (doc) {
-        await Note.deleteMany({
-            _id: {
-                $in: doc.notes
-            }
-        })
-    }
 })
 
-module.exports = mongoose.model('Customer', CustomerSchema);
+module.exports = mongoose.model('Customer', schema);

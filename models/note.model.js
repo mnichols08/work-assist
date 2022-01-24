@@ -1,13 +1,14 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose')
+const Customer = require('./customer.model')
 
-const NoteSchema = new Schema({
+const schema = new mongoose.Schema({
     title: String,
     context: String,
     origin: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer'
     }
-});
+})
 
-module.exports = mongoose.model('Note', NoteSchema);
+
+module.exports = mongoose.model('Note', schema)
