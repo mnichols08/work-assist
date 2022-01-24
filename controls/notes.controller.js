@@ -16,7 +16,40 @@ module.exports.create = async (req, res) => {
 	res.json(note)
 }
 module.exports.read = async (req, res) => res.json( await Note.findById(req.params.id) )
-module.exports.update = async (req, res) => res.json(await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body))
+
+module.exports.updateCustomer = async (req, res) => {
+	const customer = await Customer.findById(req.params.customer)
+	await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
+	const note = await Note.findById(req.params.id)
+	note.origin = customer._id
+	customer.notes.push(note)
+	customer.save()
+	note.save()
+	res.json({status: 'success', method: 'update note origin', data: customer})
+}
+
+module.exports.update = async (req, res) => {
+	if (req.params.customer) {
+		const customer = await Customer.findById(req.params.customer)
+		await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
+		const note = await Note.findById(req.params.id)
+		note.origin = customer._id
+		if (customer !== null) await Customer.findByIdAndUpdate(req.params.customer), { $push: { notes: note._id}}
+		customer.save()
+		res.json({status: 'success', method: 'update note origin', data: note})
+		}
+	
+	// const customer = Customer.findById(req.params.customer)
+	// if (customer && customer !== null) {
+	// 	note.origin = customer._id
+	// 	await Customer.findByIdAndUpdate(req.params.customer, { $push: { notes: note }})
+	// 	await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },note)
+	// 	customer.notes.push(note)
+	// 	customer.save()
+	// 	res.json(customer)
+	// } else 
+	
+}
 
 module.exports.remove = async (req, res) => {
 const note = await Note.findById(req.params.id)
