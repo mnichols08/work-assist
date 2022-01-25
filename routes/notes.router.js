@@ -9,7 +9,7 @@ router.delete('/:id', remove )
 router.post('/:id', create)
 router.post('/', create)
 router.patch('/:id/:customerID', updateCustomer)
-// router.patch('/:id', update)
+router.patch('/:id', update)
 router.delete('/', remove )
 
 module.exports = router;

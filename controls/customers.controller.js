@@ -24,10 +24,46 @@ module.exports.update = async (req, res) => {
   else res.json({status: 'success', method, data: customer, info })
 }
 
+module.exports.clearNotes = async (req, res) => {
+  if (await Customer.findById(req.params.id)){
+    const customer = await Customer.findById(req.params.id)
+    const notes = customer.notes.forEach(async id => {
+      const note = await Note.findById(id)
+      note.origin = undefined
+      note.save()
+    })
+    customer.notes = []
+    customer.save()
+  } 
+  else {
+    const customers = await Customer.find()
+    const notes = customers.map(customer => customer.notes)
+    notes.forEach(note => {
+      note.forEach(async id => {
+        const note = await Note.findById(id)
+        note.origin = undefined
+        note.save()
+      })
+    })
+    await Customer.updateMany({notes: []})
+  }
+
+  res.json(await Note.find())
+  
+}
+
+module.exports.removeOne = async (req, res) => {
+  if (req.params.id === req.url.slice(1)) res.json
+  ({status: 'success', method: 'Remove all Customers and modify note',
+    data:  {note: await Note.updateMany({origin: undefined}),
+     customer: await Customer.deleteMany()}})
+     
+}
+
 module.exports.remove = async (req, res) => {
   const data = await Customer.findById(req.params.id)
   let customer = data
-  console.log(data)
+  console.log(req.url)
   if (req.url == req.params.id) customer = undefined
   if (req.params.id && customer !== null) {
     customer.notes.map(async noteID => {
@@ -53,6 +89,8 @@ module.exports.remove = async (req, res) => {
 
 module.exports.removeNotes = async (req, res) => {
   const { id, arg } = req.params
+  console.log(req.url)
+  if (id === req.url.slice(1)) res.json('pizza')
   const data = await Customer.findById(id)
   let customer = data
   if (req.url == req.params.id) customer = undefined
