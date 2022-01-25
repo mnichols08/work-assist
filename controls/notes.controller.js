@@ -8,8 +8,8 @@ module.exports.create = async (req, res) => {
 	const note = await new Note(req.body)
 	const customer = await Customer.findById(req.params.id)
 	if (req.params.id) {
-		customer.notes.push(note)
 		note.origin = customer._id
+		customer.notes.push(note)
 		customer.save()
 	}
 	note.save()
@@ -18,14 +18,29 @@ module.exports.create = async (req, res) => {
 module.exports.read = async (req, res) => res.json( await Note.findById(req.params.id) )
 
 module.exports.updateCustomer = async (req, res) => {
-	const customer = await Customer.findById(req.params.customer)
-	await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
-	const note = await Note.findById(req.params.id)
-	note.origin = customer._id
-	customer.notes.push(note)
-	customer.save()
-	note.save()
-	res.json({status: 'success', method: 'update note origin', data: customer})
+	const { id, customerID } = req.params
+		const oldNote = await Note.findById(id)
+		const customers = await Customer.find()
+		
+		oldNote.origin = undefined
+		oldNote.save()
+
+		customers.map(async customerID => {
+			const oldCustomer = await Customer.findById(customerID)
+			if (oldCustomer.notes.includes(id)) {
+				oldCustomer.notes.pull(id)
+				oldCustomer.save()
+			}	
+		})	
+		await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
+		const note = await Note.findById(id)
+		note.origin = customerID
+		note.save()
+		
+		const newCustomer = await Customer.findById(customerID)
+		newCustomer.notes.push(id)
+		newCustomer.save()
+		res.json({status: 'success', method: 'update note origin', data: note})
 }
 
 module.exports.update = async (req, res) => {
