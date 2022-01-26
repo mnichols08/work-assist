@@ -1,18 +1,18 @@
 const express = require('express')
-const { create, read, update, remove, removeOne, removeNotes, clearNotes } = require('../controls/customers.controller')
+const { create, read, update, remove, removeOne, removeTickets, clearTickets } = require('../controls/customers.controller')
 const router = express.Router()
 
 router.get('/', read)
 router.post('/', create)
 router.get('/:id', read)
 
-router.patch('/clear', clearNotes)
-router.patch('/:id/clear', clearNotes)
+router.patch('/clear', clearTickets)
+router.patch('/:id/clear', clearTickets)
 router.patch('/:id', update)
 
-router.delete('/remove/:arg', removeNotes)
-router.delete('/remove', removeNotes)
-router.delete('/:id/remove', removeNotes)
+router.delete('/remove/:arg', removeTickets)
+router.delete('/remove', removeTickets)
+router.delete('/:id/remove', removeTickets)
 router.delete('/:id', removeOne)
 
 

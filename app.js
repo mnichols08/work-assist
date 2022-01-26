@@ -10,6 +10,7 @@ var cookieParser = require('cookie-parser')
 
 var notesRouter = require('./routes/notes.router');
 var customersRouter = require('./routes/customers.router');
+var ticketsRouter = require('./routes/tickets.router');
 
 var app = express();
 const CLIENT_API = process.env.CLIENT_API;
@@ -34,6 +35,7 @@ app.use(checkLoggedIn)
 
 app.use('/customers/', customersRouter);
 app.use('/notes/', notesRouter);
+app.use('/tickets/', ticketsRouter);
 
 
 function checkLoggedIn(req, res, next) { 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Ticket = require('./note.model');
 const Note = require('./note.model');
 
 const schema = new mongoose.Schema({
@@ -8,10 +9,10 @@ const schema = new mongoose.Schema({
         unique: true
     },
     phone: Number,
-    notes: [
+    tickets: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Note'
+            ref: 'Ticket'
         }
     ]
 })
