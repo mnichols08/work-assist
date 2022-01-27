@@ -13,7 +13,7 @@ import { generateTicket } from './components/ticket/helper'
 
 import Page from './components/page'
 
-const API_KEY = process.env.API_KEY
+const API_KEY = process.env.CLIENT_API
 
 class App extends Component {
   constructor(props) {
