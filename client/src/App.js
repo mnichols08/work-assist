@@ -13,7 +13,8 @@ import { generateTicket } from './components/ticket/helper'
 
 import Page from './components/page'
 
-const API_KEY = process.env.CLIENT_API
+const CLIENT_API = process.env.REACT_APP_CLIENT_API 
+console.log(CLIENT_API)
 
 class App extends Component {
   constructor(props) {
@@ -61,7 +62,7 @@ class App extends Component {
     fetch('/customers', {
       method: 'GET',
       headers: {
-        authkey: API_KEY
+        authkey: CLIENT_API
       }
     })
     .then(response => response.json())
@@ -70,7 +71,7 @@ class App extends Component {
     fetch('/tickets', {
       method: 'GET',
       headers: {
-        authkey: API_KEY
+        authkey: CLIENT_API
       }
     })
     .then(response => response.json())
@@ -79,7 +80,7 @@ class App extends Component {
     fetch('/notes', {
       method: 'GET',
       headers: {
-        authkey: API_KEY
+        authkey: CLIENT_API
       }
     })
     .then(response => response.json())
