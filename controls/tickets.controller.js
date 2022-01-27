@@ -4,7 +4,7 @@ const Ticket = require('../models/ticket.model')
 const Note = require('../models/ticket.model')
 const Customer = require('../models/customer.model')
 
-module.exports.index = async (req, res) => res.json(await Ticket.find())
+module.exports.index = async (req, res) => res.json({status: 'success', method: 'read', data: await Ticket.find()})
 module.exports.create = async (req, res) => {
 	const ticket = await new Ticket(req.body)
 	const customer = await Customer.findById(req.params.id)
@@ -16,7 +16,7 @@ module.exports.create = async (req, res) => {
 	ticket.save()
 	res.json(ticket)
 }
-module.exports.read = async (req, res) => res.json( await Ticket.findById(req.params.id) )
+module.exports.read = async (req, res) => res.json( {status: 'success', method: 'read', data: await Ticket.findById(req.params.id)} )
 
 module.exports.updateCustomer = async (req, res) => {
 	const { id, customerID } = req.params

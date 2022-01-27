@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 const Note = require('../models/note.model')
 const Ticket = require('../models/ticket.model')
 
-module.exports.index = async (req, res) => res.json(await Note.find())
+module.exports.index = async (req, res) => res.json({status: 'success', method: 'index', data: await Note.find()})
 module.exports.create = async (req, res) => {
 	const note = await new Note(req.body)
 	const ticket = await Ticket.findById(req.params.id)
@@ -15,7 +15,7 @@ module.exports.create = async (req, res) => {
 	note.save()
 	res.json(note)
 }
-module.exports.read = async (req, res) => res.json( await Note.findById(req.params.id) )
+module.exports.read = async (req, res) => res.json({status: 'success', method: 'index', data: await Note.findById(req.params.id)} )
 
 module.exports.updateTicket = async (req, res) => {
 	const { id, ticketID } = req.params
