@@ -25,7 +25,7 @@ class NewPaletteForm extends Component {
             open: true,
             currentColor: '#800000',
             newColorName: '',
-            colors: seed[0].colors,
+            colors: seed[Math.floor(Math.random() * seed.length)].colors,
             newPaletteName: ''
         }
         this.addNewColor = this.addNewColor.bind(this)
@@ -83,11 +83,52 @@ class NewPaletteForm extends Component {
         const { open, colors } = this.state
         const paletteIsFull = colors.length >= maxColors
         return (
-         <form>
-             <label for="title">Title: </label><input type="text" id="title" /><br />
-             <label for="description">Description: </label><input type="text" id="description"/><br />
-             <button onSubmit={this.createCustomer}>Submit</button>
-         </form>
+            <div className={classes.root}>
+                <PaletteFormNav open={open} palettes={palettes} handleSubmit={this.handleSubmit} handleDrawerOpen={this.handleDrawerOpen} />
+                <Drawer
+                    className={classes.drawer}
+                    variant='persistent'
+                    anchor='left'
+                    open={open}
+                    classes={{
+                        paper: classes.drawerPaper
+                    }}
+                >
+                    <div className={classes.drawerHeader}>
+                        <IconButton onClick={this.handleDrawerClose}>
+                            <ChevronLeftIcon />
+                        </IconButton>
+                    </div>
+                    <Divider />
+                    <div className={classes.container} >
+                        <Typography variant='h4' gutterBottom>design Your pal.it</Typography>
+                        <div className={classes.buttons}>
+                            <Button variant='contained' color='secondary' onClick={this.clearColors} className={classes.button}>
+                                Clear Palette
+                            </Button>
+                            <Button variant='contained' color='primary' onClick={this.addRandomColor} disabled={paletteIsFull} className={classes.button}>
+                                Random Color
+                            </Button>
+                        </div>
+                        <ColorPickerForm 
+                            paletteIsFull={paletteIsFull}
+                            addNewColor={this.addNewColor}
+                            colors={colors}
+                        />
+                    </div>
+                </Drawer>
+                <main className={classNames(classes.content, {
+                    [classes.contentShift]: open
+                })}>
+                    <div className={classes.drawerHeader} />
+                            <DragList
+                                colors={this.state.colors}
+                                removeColor={this.removeColor}
+                                axis='xy'
+                                onSortEnd={this.onSortEnd}
+                            />
+                </main>
+            </div>
         )
     }
 }

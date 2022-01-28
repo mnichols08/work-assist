@@ -14,7 +14,6 @@ import { generateTicket } from './components/ticket/helper'
 import Page from './components/page'
 
 const CLIENT_API = process.env.REACT_APP_CLIENT_API 
-console.log(CLIENT_API)
 
 class App extends Component {
   constructor(props) {
@@ -22,6 +21,7 @@ class App extends Component {
     const savedTickets = JSON.parse(window.localStorage.getItem('tickets'))
     this.state = { customers: [], customer: {}, tickets: [], notes: [] }
     this.saveTicket = this.saveTicket.bind(this)
+    this.saveCustomer = this.saveCustomer.bind(this)
     this.findTicket = this.findTicket.bind(this)
     this.findCustomer = this.findCustomer.bind(this)
     this.deleteTicket = this.deleteTicket.bind(this)
@@ -44,10 +44,27 @@ class App extends Component {
     )
   }
   deleteCustomer(id) {
-    this.setState(
-      st => ({ tickets: st.tickets.filter(ticket => ticket.id !== id) }),
-      this.syncLocalStorage
-    )
+    const path = `/customers/${id}`
+    fetch(path, {
+      method: 'DELETE',
+      headers: {
+        authkey: CLIENT_API
+      }
+    })
+    .then(response => response.json())
+    .then(blob => this.setState({ customers: blob.data}))
+  }
+  saveCustomer(newCustomer) {
+    fetch('/customers', {
+        method: 'POST',
+        headers: {
+          authkey: CLIENT_API,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newCustomer)
+      })
+      .then(response => response.json())
+      .then(blob => this.setState({ customers: blob.data}))
   }
   saveTicket(newTicket) {
     this.setState({ tickets: [...this.state.tickets, newTicket] },
@@ -55,7 +72,7 @@ class App extends Component {
   }
   syncLocalStorage() {
     window.localStorage.setItem(
-      'tickets', JSON.stringify(this.state.tickets)
+      'customers', JSON.stringify(this.state.customers)
     )
   }
   componentDidMount() {
@@ -123,7 +140,7 @@ class App extends Component {
                       </Page>
                     )}
                   />
-                  <Route exact path='/customer/new' render={routeProps => <Page><NewCustomerForm saveTicket={this.saveTicket } tickets={this.state.tickets} {...routeProps } /></Page>} />
+                  <Route exact path='/customer/new' render={routeProps => <Page><NewCustomerForm saveCustomer={this.saveCustomer } tickets={this.state.tickets} {...routeProps } /></Page>} />
                   <Route
                     exact
                     path='/'
@@ -147,7 +164,7 @@ class App extends Component {
                     exact
                     path='/customer'
                     render={routeProps => (
-                      <Page><CustomerIndex customers={this.state.customers} {...routeProps }/></Page>
+                      <Page><CustomerIndex deleteCustomer={this.deleteCustomer} customers={this.state.customers} {...routeProps }/></Page>
                     )}
                   />
                   

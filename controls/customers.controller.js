@@ -4,11 +4,13 @@ const Customer = require('../models/customer.model')
 const Ticket = require('../models/ticket.model')
 
 module.exports.create = async (req, res) => {
+
   const method = 'Create Customer'
   try {
     const customer = await new Customer(req.body)
-    res.json({status: 'success', method, data: await customer.save()})
-  } catch (err) { res.json({status: 'fail', method, data: err}) }
+    await customer.save()
+    res.json({status: 'success', method, data: await Customer.find()})
+  } catch (err) { res.json({status: 'fail', method, data: await Customer.find()}) }
 
 }
 module.exports.read = async (req, res) => {
@@ -53,17 +55,24 @@ module.exports.clearTickets = async (req, res) => {
 }
 
 module.exports.removeOne = async (req, res) => {
-  if (req.params.id === req.url.slice(1)) res.json
-  ({status: 'success', method: 'Remove all Customers and modify ticket',
-    data:  {ticket: await Ticket.updateMany({origin: undefined}),
-     customer: await Customer.deleteMany()}})
-     
+ const deletedCustomer = await Customer.findByIdAndDelete(req.params.id)
+ if (deletedCustomer) {
+  const tickets = await Ticket.find()
+  tickets.map(async ticketID => {
+    const ticket = await Ticket.findById(ticketID)
+
+    ticket.origin = undefined
+    ticket.save()
+    })
+   res.json({status: 'success', method: 'Remove customer by ID and modify tickets', data: await Customer.find()})
+} else res.json({status: 'fail', method: 'Remove customer by ID and modify tickets', data: await Customer.find()})
+  
 }
 
 module.exports.remove = async (req, res) => {
   const data = await Customer.findById(req.params.id)
   let customer = data
-  console.log(req.url)
+ 
   if (req.url == req.params.id) customer = undefined
   if (req.params.id && customer !== null) {
     customer.tickets.map(async ticketID => {
@@ -72,7 +81,7 @@ module.exports.remove = async (req, res) => {
       ticket.save()
     })
     customer.delete()
-    res.json({status: 'success', method: 'Remove Specific Customer and Modify Tickets', data})
+    res.json({status: 'success', method: 'Remove Specific Customer and Modify Tickets', data: await Customer.find()})
   } else if (data !== null) {
     
     const tickets = await Ticket.find()
@@ -83,13 +92,13 @@ module.exports.remove = async (req, res) => {
       ticket.save()
     })
     await Customer.deleteMany()
-    res.json({status: 'success', method: 'Remove All Customers and Modify Tickets', data})
-  } else res.json({status: 'fail', method: 'Remove All Customers and Modify Tickets', data})
+    res.json({status: 'success', method: 'Remove All Customers and Modify Tickets', data: await Customer.find()})
+  } else res.json({status: 'fail', method: 'Remove All Customers and Modify Tickets', data: await Customer.find()})
 }
 
 module.exports.removeTickets = async (req, res) => {
   const { id, arg } = req.params
-  console.log(req.url)
+
   if (id === req.url.slice(1)) res.json('pizza')
   const data = await Customer.findById(id)
   let customer = data
@@ -97,7 +106,7 @@ module.exports.removeTickets = async (req, res) => {
   if (!arg && id && customer !== null) {
     customer.tickets.map(async ticketID => await Ticket.findByIdAndDelete(ticketID))
     customer.delete()
-    res.json({status: 'success', method: 'Remove Specific Customer and Tickets', data})
+    res.json({status: 'success', method: 'Remove Specific Customer and Tickets', data: await Customer.find()})
   } else {
     const tickets = await Ticket.find()
     tickets.map(async ticketID => {
@@ -106,7 +115,7 @@ module.exports.removeTickets = async (req, res) => {
       ticket.delete()
     })
     await Customer.deleteMany()
-    res.json({status: 'success', method: 'Remove All Customers and Tickets', data})
+    res.json({status: 'success', method: 'Remove All Customers and Tickets', data: await Customer.find()})
   }
 }
 // module.exports.removeWithTickets = async (req, res) => {

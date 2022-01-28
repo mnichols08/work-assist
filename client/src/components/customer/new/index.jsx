@@ -21,10 +21,9 @@ class NewCustomerForm extends Component {
     constructor(props){
         super(props)
         this.state = {
-            open: true,
-            currentColor: '#800000',
-            newColorName: '',
-            newPaletteName: ''
+              name: '',
+              phone: '',
+              suggestions: []
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -34,25 +33,82 @@ class NewCustomerForm extends Component {
     handleChange(e) {
         this.setState( { [e.target.name]: e.target.value })
     }
-    handleSubmit(newCustomer) {
-        console.log(newCustomer)
-       // this.props.savePalette(newPalette)
-       // this.props.history.push('/')
+    handleSuggestion(e) { 
+        const suggestion = {[e.target.name]: e.target.value}
+       // this.setState( { suggestions: [...this.state.suggestions, suggestion] })
+        console.log(suggestion)
     }
-    onSortEnd = ({ oldIndex, newIndex }) => {
-        this.setState(({ colors }) => ({
-            colors: arrayMove(colors, oldIndex, newIndex)
-        }))
+    handleSubmit(e) {
+        e.preventDefault()
+        e.stopPropagation()
+        const customer = {name: e.target.name.value, phone: e.target.phone.value}
+
+        this.props.saveCustomer(customer)
+        this.props.history.push(`/customer/`)
     }
+    handleClick(e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+    }
+    anotherInput(e) {
+        //this.setState({ suggestions: [...this.state.suggestions, e.target.parentNode.parentNode] })
+        console.log( e.target.parentNode.parentNode)
+        let div = document.createElement('div')
+        let suggestionLabel = document.createElement('label')
+        let extraInput = document.createElement('input')
+        let extraResponse = document.createElement('input')
+        let newButton = document.createElement('button')
+        newButton.innerText = '+'
+        newButton.onClick = this
+        div.innerHTML = `
+            <label for="suggestion">Suggestion: </label>
+            <input type="text" id="extra" name="extra" onChange={this.handleChange}/>: 
+            <input type="text" id="response" name="response" onChange={this.handleChange}/>
+             <button onClick={this.anotherInput}>+</button><br />
+             `
+        div.append(newButton)
+        console.log(div)
+        // let typeOf;
+        // if (sel === "#checks") {
+        //     typeOf = "slip";
+        // } else if (sel === "#pennies") {
+        //     typeOf = "check";
+        // }
+        // const id = typeOf + "_" + o
+        // const div = document.createElement("div");
+        // div.classList = `input ${typeOf}`;
+        // div.innerHTML = `
+        // <input "type="number" placeholder="Additional ${
+        //     typeOf[0].toUpperCase() + typeOf.slice(1)
+        // }"><button onclick='remInput("${id}")' class="rem">x</button> $<span>0.00</span> ${
+        //     typeOf[0].toUpperCase() + typeOf.slice(1)
+        // }
+        // `;
+        // div.id = id;
+        // o++;
+        // document.body.insertBefore(div, document.querySelector(sel));
+        // calculate();
+        // document.querySelector(`#${div.id} input`).focus();
+    };
+
     render() {
         const { classes, maxColors, palettes } = this.props
         const { open, colors } = this.state
         return (
-         <form>
-             <label for="title">Title: </label><input type="text" id="title" /><br />
-             <label for="description">Description: </label><input type="text" id="desc" /><br />
-             <button onSubmit={this.handleSubmit()}>Submit</button>
-         </form>
+    <form onSubmit={this.handleSubmit}>
+    
+             <label for="name">Customer Name: </label><input required type="text" id="name" name="name" onChange={this.handleChange}/><br />
+             <label for="phone">Phone Number: </label><input type="number" id="phone" name="phone" onChange={this.handleChange}/><br />
+            {/* <div>
+            <label for="suggestion">Suggestion: </label><input type="text" id="extra" name="extra" onChange={this.handleSuggestion}/>: <input type="text" id="response" name="response" onChange={this.handleSuggestion}/>
+             <button onClick={this.anotherInput}>+</button><br />
+            </div> */}
+         
+         <button id="submit" >Submit</button>
+      
+    </form>  
+    
         )
     }
 }
