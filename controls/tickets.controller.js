@@ -14,9 +14,9 @@ module.exports.create = async (req, res) => {
 		customer.save()
 	}
 	ticket.save()
-	res.json(ticket)
+	res.json({status: 'success', method: 'create ticket', data: ticket})
 }
-module.exports.read = async (req, res) => res.json( {status: 'success', method: 'read', data: await Ticket.findById(req.params.id)} )
+module.exports.read = async (req, res) => res.json( {status: 'success', method: 'read', data: await Ticket.find()} )
 
 module.exports.updateCustomer = async (req, res) => {
 	const { id, customerID } = req.params
@@ -41,7 +41,7 @@ module.exports.updateCustomer = async (req, res) => {
 		const newCustomer = await Customer.findById(customerID)
 		newCustomer.tickets.push(id)
 		newCustomer.save()
-		res.json({status: 'success', method: 'update ticket origin', data: ticket})
+		res.json({status: 'success', method: 'update ticket origin', data: await Ticket.find()})
 }
 
 module.exports.update = async (req, res) => {
@@ -52,7 +52,7 @@ module.exports.update = async (req, res) => {
 		ticket.origin = customer._id
 		if (customer !== null) await Customer.findByIdAndUpdate(req.params.customer), { $push: { tickets: ticket._id}}
 		customer.save()
-		res.json({status: 'success', method: 'update ticket origin', data: ticket})
+		res.json({status: 'success', method: 'update ticket origin', data: await Ticket.find()})
 		}
 	
 	// const customer = Customer.findById(req.params.customer)
@@ -72,7 +72,7 @@ const ticket = await Ticket.findById(req.params.id)
 	if (ticket) {
 		const customerID = ticket.origin
 		await Customer.findByIdAndUpdate(customerID, { $pull: { tickets: req.params.id }})
-		res.json({status: 'success', method: 'delete', data: ticket})
+		res.json({status: 'success', method: 'delete', data: await Ticket.find()})
 		await ticket.delete()
 	}
 	else {

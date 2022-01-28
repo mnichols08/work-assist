@@ -47,7 +47,7 @@ class TicketIndex extends Component {
     const { openDeleteDialog, allTickets } = this.state
     const { customer, classes } = this.props
    const filteredTickets = allTickets.filter(ticket => ticket.origin === customer._id)
-   console.log(customer)
+
     return (
       <div >
       

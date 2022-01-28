@@ -65,10 +65,7 @@ class CustomerIndex extends Component {
             <SearchBox 
         placeholder='search customers...'
         handleChange={this.handleChange}
-        />
-            
-            
-    
+        />    
             <Link to='/customer/new'>Create a Customer</Link>
           </nav>
           <TransitionGroup className={classes.tickets}>

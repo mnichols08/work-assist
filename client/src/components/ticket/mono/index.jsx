@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import ColorBox from '../color-box'
-import Navbar from '../navbar'
+import Navbar from '../../page/navbar'
 import TicketFooter from '../footer'
 
 import styles from '../component/styles'

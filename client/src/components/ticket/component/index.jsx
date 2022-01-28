@@ -1,43 +1,46 @@
 import React, { Component } from 'react'
-import ColorBox from '../color-box'
-import Navbar from '../navbar'
-import TicketFooter from '../footer'
 
 import styles from './styles'
 
 class Ticket extends Component {
     constructor(props) {
         super(props)
-        this.state = { level: 500, format: 'hex' }
-        this.changeLevel = this.changeLevel.bind(this)
-        this.changeFormat = this.changeFormat.bind(this)
+        this.state = { title: '', description: '', allTickets: [], customerID: '' }
+        this.postNewTicket = this.postNewTicket.bind(this)
+        this.renderNewTicket = this.renderNewTicket.bind(this)
+        this.handleChange = this.handleChange.bind(this)
     }
-    changeLevel(level) {
-        this.setState({ level })
+
+    postNewTicket(){
+        this.props.newTicket(this.state)
     }
-    changeFormat(val) {
-        this.setState({ format: val })
+
+    renderNewTicket(){
+        
+    }
+
+    goToTicket(id){
+   
+    }
+
+    handleChange(e) {
+        this.setState( { [e.target.name]: e.target.value })
+    }
+    componentDidMount(){
+        this.setState({allTickets: this.props.allTickets, customerID: this.props.customer._id})
     }
     render() {
-        const { colors, ticketName, emoji, id } = this.props.ticket
-        const { classes } = this.props
-        const { level, format } = this.state
-        const colorBoxes = colors[level].map(color => 
-            (<ColorBox background={color[format]} name={color.name} key={color.id} moreUrl={`/ticket/${id}/${color.id}`} showFullTicket />) )
-        return (
-            <div className={classes.Ticket}>
-                <Navbar 
-                    level={ level }
-                    changeLevel={ this.changeLevel }
-                    handleChange={this.changeFormat}
-                    showingAllColors
-                />
-                <div className={classes.colors}>
-                    { colorBoxes } 
-                </div>
-                <TicketFooter
-                 ticketName={ticketName} emoji={emoji} />
-            </div>
+        const { allTickets, customerID } = this.state
+
+        
+       const filteredTickets = allTickets.filter(ticket => ticket.origin === customerID)
+       console.log(this.state.allTickets !== undefined)
+           return (
+            <ul><form onSubmit={this.postNewTicket}><input onChange={this.handleChange} placeholder="title" name="title" type="text"></input><br /><input onChange={this.handleChange} name="description" type="text" placeholder="description"></input></form><button onClick={this.postNewTicket}>Create New Ticket</button>
+                {filteredTickets.map(ticket => (
+                    <li><a onClick={this.goToTicket}> {ticket.title} | {ticket.description} </a> | <a onClick={this.goToTicket}>x</a></li>
+                ))}
+            </ul>
         )
     }
 }

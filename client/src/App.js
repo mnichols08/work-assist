@@ -67,12 +67,26 @@ class App extends Component {
       .then(blob => this.setState({ customers: blob.data}))
   }
   saveTicket(newTicket) {
-    this.setState({ tickets: [...this.state.tickets, newTicket] },
-      this.syncLocalStorage )
+    fetch('/tickets/' + newTicket.customerID ,  {
+      method: 'POST',
+      headers: {
+        authkey: CLIENT_API,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newTicket.ticket)
+    })
+    .then(response => response.json())
+    .then(blob => this.setState({ tickets: blob.data}))
   }
   syncLocalStorage() {
     window.localStorage.setItem(
       'customers', JSON.stringify(this.state.customers)
+    )
+    window.localStorage.setItem(
+      'tickets', JSON.stringify(this.state.tickets)
+    )
+    window.localStorage.setItem(
+      'notes', JSON.stringify(this.state.notes)
     )
   }
   componentDidMount() {
@@ -155,7 +169,7 @@ class App extends Component {
                         <Customer 
                         {...routeProps}
                         customer={this.findCustomer(routeProps.match.params.id)}
-                        tickets={this.state.tickets}                 
+                        tickets={this.state.tickets} newTicket={this.saveTicket}                 
                       />
                       </Page>
                     )}
