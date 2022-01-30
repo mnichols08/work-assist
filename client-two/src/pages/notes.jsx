@@ -9,7 +9,7 @@ class NoteIndex extends Component {
   render() {
     return (
       <main className="index">
-        <p>Note Index</p>
+        <h1>Note Index</h1>
         <ul>
             {this.props.notes.map(note => (
                  

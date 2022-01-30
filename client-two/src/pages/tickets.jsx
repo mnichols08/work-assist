@@ -10,7 +10,7 @@ class TicketIndex extends Component {
   render() {
     return (
       <main className="index">
-        <p>Ticket Index</p>
+        <h1>Ticket Index</h1>
         <ul>
             {this.props.tickets.map(ticket => (
                  

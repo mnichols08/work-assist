@@ -6,7 +6,7 @@ class IndexPage extends Component {
   render() {
     return (
       <main className="index">
-        <p>Home Page</p>
+        <h1>Home Page</h1>
       </main>
     );
   }

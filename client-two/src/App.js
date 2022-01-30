@@ -4,13 +4,14 @@ import {
   Switch,
   Route,
   Link,
-  useParams
+  useParams,
 } from "react-router-dom";
 
 import Header from "./page/header";
-import Footer from './page/footer'
+import Footer from "./page/footer";
 import IndexPage from "./pages/index";
 import CustomerIndex from "./pages/customers";
+import Customer from "./pages/customer";
 import TicketIndex from "./pages/tickets";
 import NoteIndex from "./pages/notes";
 import "./App.css";
@@ -26,13 +27,13 @@ class App extends Component {
       customers: [],
       tickets: [],
       notes: [],
-      searchFor: '',
+      searchFor: "",
       filteredCustomers: [],
       filteredTickets: [],
-      filteredNotes: []
+      filteredNotes: [],
     };
-    this.goHome = this.goHome.bind(this);
-    this.fetchState = this.fetchState.bind(this);
+
+    this.setCustomerID = this.setCustomerID.bind(this);
     this.setCustomers = this.setCustomers.bind(this);
     this.getCustomers = this.getCustomers.bind(this);
     this.getCustomer = this.getCustomer.bind(this);
@@ -45,41 +46,39 @@ class App extends Component {
     this.getNotes = this.getNotes.bind(this);
     this.getNote = this.getNote.bind(this);
     this.putNote = this.putNote.bind(this);
-    this.setSearch = this.setSearch.bind(this)
-  }
-  goHome() {
-    this.fetchState();
+    this.setSearch = this.setSearch.bind(this);
   }
   setSearch(searchField) {
     try {
-    const filteredCustomers = this.state.customers.filter(o => Object.keys(o).some(k => o[k].toString().toLowerCase().includes(searchField.toString().toLowerCase())));
-    const filteredTickets = this.state.tickets.filter(o => Object.keys(o).some(k => o[k].toString().toLowerCase().includes(searchField.toString().toLowerCase())));
-    const filteredNotes = this.state.notes.filter(o => Object.keys(o).some(k => new String(o[k]).toLowerCase().includes(searchField.toString().toLowerCase())));
-    this.setState({filteredCustomers, filteredTickets, filteredNotes})
-    } catch {
-    }
-  }
-  fetchState() {
-    fetch("/open", {
-      method: "GET",
-      headers: {
-        authkey: CLIENT_API,
-      },
-    })
-      .then((response) => response.json())
-      .then((blob) =>
-        this.setState({
-          customers: blob.state.customers,
-          tickets: blob.state.tickets,
-          notes: blob.state.notes,
-          filteredCustomers: blob.state.customers,
-          filteredTickets: blob.state.tickets,
-          filteredNotes: blob.state.notes
-        })
+      const filteredCustomers = this.state.customers.filter((o) =>
+        Object.keys(o).some((k) =>
+          o[k]
+            .toString()
+            .toLowerCase()
+            .includes(searchField.toString().toLowerCase())
+        )
       );
+      const filteredTickets = this.state.tickets.filter((o) =>
+        Object.keys(o).some((k) =>
+          o[k]
+            .toString()
+            .toLowerCase()
+            .includes(searchField.toString().toLowerCase())
+        )
+      );
+      const filteredNotes = this.state.notes.filter((o) =>
+        Object.keys(o).some((k) =>
+          new String(o[k])
+            .toLowerCase()
+            .includes(searchField.toString().toLowerCase())
+        )
+      );
+      this.setState({ filteredCustomers, filteredTickets, filteredNotes });
+    } catch {}
   }
+
   setCustomers() {
-    this.setState({ searchFor: 'customers'})
+    this.setState({ searchFor: "customers" });
   }
   getCustomers() {
     fetch("/customers", {
@@ -101,6 +100,9 @@ class App extends Component {
       .then((response) => response.json())
       .then((blob) => this.setState({ customer: blob.data }));
   }
+  setCustomerID(id) {
+    this.setState({ customer: { _id: id } });
+  }
   putCustomer(newCustomer) {
     fetch("/customers/", {
       method: "POST",
@@ -111,10 +113,10 @@ class App extends Component {
       body: JSON.stringify(newCustomer),
     })
       .then((response) => response.json())
-      .then((blob) => this.setState({ tickets: blob.data }));
+      .then((blob) => this.setState({ customer: blob.data }));
   }
   setTickets() {
-    this.setState({searchFor: 'tickets'})
+    this.setState({ searchFor: "tickets" });
   }
   getTickets() {
     fetch("/tickets", {
@@ -149,7 +151,7 @@ class App extends Component {
       .then((blob) => this.setState({ tickets: blob.data }));
   }
   setNotes() {
-    this.setState({ searchFor: 'notes'})
+    this.setState({ searchFor: "notes" });
   }
   getNotes() {
     fetch("/notes", {
@@ -184,7 +186,23 @@ class App extends Component {
       .then((blob) => this.setState({ tickets: blob.data }));
   }
   componentDidMount() {
-    this.fetchState();
+    fetch("/open", {
+      method: "GET",
+      headers: {
+        authkey: CLIENT_API,
+      },
+    })
+      .then((response) => response.json())
+      .then((blob) =>
+        this.setState({
+          customers: blob.state.customers,
+          tickets: blob.state.tickets,
+          notes: blob.state.notes,
+          filteredCustomers: blob.state.customers,
+          filteredTickets: blob.state.tickets,
+          filteredNotes: blob.state.notes,
+        })
+      );
   }
   render() {
     console.log(this.state);
@@ -200,10 +218,51 @@ class App extends Component {
             setSearch={this.setSearch}
           />
           <Switch>
-            <Route exact path="/" children={<IndexPage data={this.state}/> } />
-            <Route exact path="/customers" children={<CustomerIndex customers={this.state.filteredCustomers} />} />
-            <Route exact path="/tickets" children={<TicketIndex tickets={this.state.filteredTickets}   />} />
-            <Route exact path="/notes" children={<NoteIndex notes={this.state.filteredNotes} />}  />
+            <Route
+              exact
+              path="/"
+              children={
+                <IndexPage
+                  createCustomer={this.putCustomer}
+                  data={this.state}
+                />
+              }
+            />
+            <Route
+              exact
+              path="/customers"
+              children={
+                <CustomerIndex
+                  getCustomer={this.getCustomer}
+                  
+                  customers={this.state.filteredCustomers}
+                />
+              }
+            />
+            <Route
+              path="/customers/:id"
+              render={(routeProps) => (
+                <Customer {...routeProps} tickets={this.state.tickets} customer={this.state.customer} getCustomer={this.getCustomer} />
+              )}
+            />
+            <Route
+              exact
+              path="/tickets"
+              children={<TicketIndex tickets={this.state.filteredTickets} />}
+            />
+            <Route
+              path="/customers/:id"
+              children={<Customer ticket={this.state.ticket} />}
+            />
+            <Route
+              exact
+              path="/notes"
+              children={<NoteIndex notes={this.state.filteredNotes} />}
+            />
+            <Route
+              path="/customers/:id"
+              children={<Customer note={this.state.note} />}
+            />
           </Switch>
           <Footer />
         </div>

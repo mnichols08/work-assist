@@ -10,12 +10,12 @@ module.exports.create = async (req, res) => {
     const customer = await new Customer(req.body)
     await customer.save()
     res.json({status: 'success', method, data: await Customer.find()})
-  } catch (err) { res.json({status: 'fail', method, data: await Customer.find()}) }
+  } catch (err) { res.json({status: 'fail', method, customer, data: await Customer.find()}) }
 
 }
 module.exports.read = async (req, res) => {
   const customer = await Customer.findById(req.params.id)
-  if (customer) res.json({status: 'success', method: 'Read Customer', data: customer})
+  if (customer) res.json({status: 'success', method: 'Read Customer', data: customer, tickets: await Ticket.find()})
   else res.json({status: 'success', method: 'Customer Index', data: await Customer.find()})
 }
 module.exports.update = async (req, res) => {
