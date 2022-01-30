@@ -1,0 +1,47 @@
+.App-header {
+    background-color: #282c34;
+    height: 3.5em;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    font-size: calc(10px + 2vmin);
+    color: white;
+  }
+header div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+header div a code {
+    margin-left:15%;
+}
+header nav{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+}
+header div a {
+    color: #eee;
+    text-decoration: none;
+}
+header.App-header div a:hover {
+    color: #99ff9c;
+    text-decoration: none;
+}
+
+header nav a {
+    margin-right: 1em;
+    text-decoration: none;
+}
+
+header nav a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+header {
+    height: 10em;
+}
+
+

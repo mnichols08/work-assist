@@ -11,6 +11,7 @@ var cookieParser = require('cookie-parser')
 var notesRouter = require('./routes/notes.router');
 var customersRouter = require('./routes/customers.router');
 var ticketsRouter = require('./routes/tickets.router');
+var openRouter = require('./routes/open.router');
 
 var app = express();
 const CLIENT_API = process.env.CLIENT_API;
@@ -36,7 +37,7 @@ app.use(cookieParser());
 app.use('/customers/', customersRouter);
 app.use('/notes/', notesRouter);
 app.use('/tickets/', ticketsRouter);
-
+app.use('/open/', openRouter)
 
 function checkLoggedIn(req, res, next) { 
   const isLoggedIn = req.headers.authkey === CLIENT_API

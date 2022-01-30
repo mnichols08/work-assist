@@ -36,12 +36,11 @@ class NewCustomerForm extends Component {
     handleSuggestion(e) { 
         const suggestion = {[e.target.name]: e.target.value}
        // this.setState( { suggestions: [...this.state.suggestions, suggestion] })
-        console.log(suggestion)
     }
     handleSubmit(e) {
         e.preventDefault()
         e.stopPropagation()
-        const customer = {name: e.target.name.value, phone: e.target.phone.value}
+        const customer = this.state
 
         this.props.saveCustomer(customer)
         this.props.history.push(`/customer/`)
