@@ -10,11 +10,37 @@ const CLIENT_API = null;
 class Customer extends Component {
   constructor(props) {
     super(props);
-    this.state = { customer: {}, tickets: {}, deleteID: '' };
+    this.state = {
+      customer: this.props.customer,
+      customerTickets: this.props.customerTickets,
+      tickets: this.props.tickets,
+      ticket: {}
+    };
     this.handleDelete = this.handleDelete.bind(this);
+    this.newTicket = this.newTicket.bind(this);
+  }
+
+  handleDelete(id) {
+    this.props.removeTicket(id);
+    this.setState({
+      customerTickets: this.state.customerTickets.filter(
+        (ticket) => ticket._id !== id
+      ),
+    });
+  }
+  async newTicket(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const title = { title: e.target.title.value };
+    e.target.title.value = ''
+    const customerID = this.state.customer._id;
+
+    const ticket = await this.props.putTicket(title, customerID);
+   this.setState({ customerTickets: [...this.state.customerTickets, ticket.ticket], ticket: ticket.ticket })
+   
   }
   componentDidMount() {
-    if ((this.customer = {})) this.props.getCustomer(this.props.match.params.id);
     fetch("/customers/" + this.props.match.params.id, {
       method: "GET",
       headers: {
@@ -23,48 +49,43 @@ class Customer extends Component {
     })
       .then((response) => response.json())
       .then((blob) =>
-        this.setState({ tickets: blob.tickets, customer: blob.data })
+        this.setState({
+          customer: blob.customer,
+          customerTickets: blob.customerTickets,
+          tickets: blob
+        })
       );
   }
-  handleDelete(e) {
-      e.stopPropagation()
-
-      console.log(this.props.id)
-
+  componentDidUpdate() {
+    this.setState();
   }
   render() {
-    let filteredTickets;
-    try {
-      filteredTickets = this.state.tickets.filter(
-        (ticket) => ticket.origin === this.state.customer._id
-      );
-    } catch {
-      filteredTickets = this.state.customer.tickets;
-    }
+ 
     return (
       <div className="index" id={this.state.customer._id}>
         <h1>{this.state.customer.name}</h1>
         <p>Phone: {this.state.customer.phone}</p>
         <h2>Tickets</h2>
-        <ul className="tickets">
-          {filteredTickets
-            ? filteredTickets.map((ticket) => (
-                <div
-                  key={ticket._id}
-                  className="ticket"
-                >
-                  <Link to={`/tickets/${ticket._id}`}>
-                    {ticket.title}
-                  </Link>
-                  <Link
-                    to={`#`}
-                    id={ticket._id}
-                    onClick={this.handleDelete}
-                  >{` x `}</Link>
-                </div>
-              ))
-            : null}
-        </ul>
+        <form onSubmit={this.newTicket}>
+          <input type="text" name="title" placeholder="Enter Title" />
+          <button type="submit">New Ticket</button>
+        </form>
+
+        <div className="tickets">
+          {this.state.customerTickets.map((ticket) => (
+            <div key={ticket._id} className="ticket">
+              <Link to={`/tickets/${ticket._id}`}>
+                {ticket.title}
+              </Link>
+              <button
+                type="submit"
+                onClick={() => this.handleDelete(ticket._id)}
+              >
+                x
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

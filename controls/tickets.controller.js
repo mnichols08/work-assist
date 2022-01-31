@@ -1,22 +1,32 @@
 var mongoose = require('mongoose');
 
 const Ticket = require('../models/ticket.model')
-const Note = require('../models/ticket.model')
+const Note = require('../models/note.model')
 const Customer = require('../models/customer.model')
 
 module.exports.index = async (req, res) => res.json({status: 'success', method: 'read', data: await Ticket.find()})
 module.exports.create = async (req, res) => {
+	console.log(req.body)
 	const ticket = await new Ticket(req.body)
 	const customer = await Customer.findById(req.params.id)
 	if (req.params.id) {
 		ticket.origin = customer._id
 		customer.tickets.push(ticket)
 		customer.save()
+		ticket.save()
+		
+		res.json({status: 'success', method: 'create ticket on customer with id of ' + req.params.id, customer, customerTickets: await Ticket.find({origin: customer._id}), tickets: await Ticket.find(), ticket})
 	}
 	ticket.save()
 	res.json({status: 'success', method: 'create ticket', data: ticket})
 }
-module.exports.read = async (req, res) => res.json( {status: 'success', method: 'read', data: await Ticket.find()} )
+module.exports.read = async (req, res) => {
+	const ticketID = req.params.id
+	const ticket = await Ticket.findById(ticketID)
+	if (!ticket) {
+		res.json( {status: 'fail', method: 'read', ticket} )
+	} else res.json({status: 'success', method: 'get one ticket', ticket, ticketNotes: await Note.find({origin: ticketID})})
+}
 
 module.exports.updateCustomer = async (req, res) => {
 	const { id, customerID } = req.params
@@ -72,8 +82,8 @@ const ticket = await Ticket.findById(req.params.id)
 	if (ticket) {
 		const customerID = ticket.origin
 		await Customer.findByIdAndUpdate(customerID, { $pull: { tickets: req.params.id }})
-		res.json({status: 'success', method: 'delete', data: await Ticket.find()})
 		await ticket.delete()
+		res.json({status: 'success', method: 'remove ticket with id of ' + req.params.id, customer: await Customer.findById(customerID), tickets: await Ticket.find()})
 	}
 	else {
 		await Customer.updateMany({tickets: []})	

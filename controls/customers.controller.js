@@ -9,13 +9,13 @@ module.exports.create = async (req, res) => {
   try {
     const customer = await new Customer(req.body)
     await customer.save()
-    res.json({status: 'success', method, data: await Customer.find()})
-  } catch (err) { res.json({status: 'fail', method, customer, data: await Customer.find()}) }
+    res.json({status: 'success', method, customer, customers: await Customer.find()})
+  } catch (err) { res.json({status: 'fail', method, customers: await Customer.find()}) }
 
 }
 module.exports.read = async (req, res) => {
-  const customer = await Customer.findById(req.params.id)
-  if (customer) res.json({status: 'success', method: 'Read Customer', data: customer, tickets: await Ticket.find()})
+  const customer =  await Customer.findById(req.params.id)
+  if (customer) res.json({status: 'success', method: 'Read Customer', customerTickets: await Ticket.find({origin: customer._id}), customer })
   else res.json({status: 'success', method: 'Customer Index', data: await Customer.find()})
 }
 module.exports.update = async (req, res) => {
@@ -64,7 +64,7 @@ module.exports.removeOne = async (req, res) => {
     ticket.origin = undefined
     ticket.save()
     })
-   res.json({status: 'success', method: 'Remove customer by ID and modify tickets', data: await Customer.find()})
+   res.json({status: 'success', method: 'Remove customer by ID and modify tickets', tickets: await Ticket.find(), data: await Customer.find()})
 } else res.json({status: 'fail', method: 'Remove customer by ID and modify tickets', data: await Customer.find()})
   
 }

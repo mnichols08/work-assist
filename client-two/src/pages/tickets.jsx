@@ -3,10 +3,12 @@ import React, { Component } from "react";
 class TicketIndex extends Component {
     constructor(props){
         super(props)
-        this.state = { deleteID: ''}
+        this.state = { tickets: this.props.tickets, deleteID: ''}
     }
 
-
+    componentDidUpdate(){
+        this.setState()
+    }
   render() {
     return (
       <main className="index">
