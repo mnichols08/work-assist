@@ -21,6 +21,8 @@ class IndexPage extends Component {
     
     const customer = await this.props.createCustomer(data);
     this.props.history.push(`/customers/${customer.customer._id}`)
+    this.props.setCustomerState(customer)
+   
 
   }
   componentDidUpdata(){
@@ -29,7 +31,7 @@ class IndexPage extends Component {
   render() {
     return (
       <main className="index">
-        <h1>Home Page</h1>
+        <h1>Tick.it</h1>
         <p>
           Thank you for visiting my app! Please use at your own accord and let me know if you come across any bugs or have any suggestions. =)
         </p>

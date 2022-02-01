@@ -28,7 +28,8 @@ module.exports.read = async (req, res) => {
 	} else res.json({status: 'success', method: 'get one ticket', ticket, ticketNotes: await Note.find({origin: ticketID})})
 }
 
-module.exports.updateCustomer = async (req, res) => {
+module.exports.updateTicket = async (req, res) => {
+	console.log(req.body)
 	const { id, customerID } = req.params
 		const oldTicket = await Ticket.findById(id)
 		const customers = await Customer.find()

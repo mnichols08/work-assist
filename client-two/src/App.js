@@ -125,6 +125,11 @@ class App extends Component {
         return newState
         
   }
+  setCustomerState(customer){
+    if (customer && this.state.customers.length > 0)
+     this.setState({customers: [...this.state.customer, customer]})
+    
+  }
   removeCustomer(id) {
     fetch("/customers/" + id, {
       method: "DELETE",
@@ -159,7 +164,23 @@ class App extends Component {
       },
     })
       .then((response) => response.json())
-      .then((blob) => this.setState({ ticket: blob.data }));
+      .then((blob) => blob.data);
+  }
+  async updateTicket(newTicket, id) {
+    const newState = await fetch("/tickets/" + id, {
+      method: "patch",
+      headers: {
+        authkey: CLIENT_API,
+      },
+      body: JSON.stringify(newTicket)
+    })
+      .then((response) => response.json())
+      .then((blob) => {
+        return { ticket: blob.ticket }
+      }
+        
+      );
+      return newState
   }
   async removeTicket(id) {
     const newState = await fetch("/tickets/" + id, {
@@ -189,7 +210,9 @@ class App extends Component {
         return {customer: blob.customer, customerTickets: blob.customerTickets, tickets: blob.tickets, ticket: blob.ticket }});
         this.setState(newState)
         return newState
-        
+  }
+  pushTicketToState(ticket){
+    this.setState({tickets: [...this.state.tickets, ticket]})
   }
   setNotes() {
     this.setState({ searchFor: "notes" });
@@ -214,38 +237,31 @@ class App extends Component {
       .then((response) => response.json())
       .then((blob) => this.setState({ note: blob.data }));
   }
-  putNote(newNote) {
-    fetch("/notes/" + newNote.ticketID, {
+  removeNote(id) {
+    fetch("/notes/" + id, {
+      method: "DELETE",
+      headers: {
+        authkey: CLIENT_API,
+      },
+    })
+      .then((response) => response.json())
+  }
+  async putNote(newNote, ticketID) {
+   const createNote = await fetch("/notes/" + ticketID, {
       method: "POST",
       headers: {
         authkey: CLIENT_API,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(newNote.note),
+      body: JSON.stringify(newNote),
     })
       .then((response) => response.json())
-      .then((blob) => this.setState({ tickets: blob.data }));
+      .then((blob) => blob );
+      return createNote
   }
-  componentDidMount() {
-    fetch("/open", {
-      method: "GET",
-      headers: {
-        authkey: CLIENT_API,
-      },
-    })
-      .then((response) => response.json())
-      .then((blob) =>
-        this.setState({
-          customers: blob.state.customers,
-          tickets: blob.state.tickets,
-          notes: blob.state.notes,
-          filteredCustomers: blob.state.customers,
-          filteredTickets: blob.state.tickets,
-          filteredNotes: blob.state.notes,
-        })
-      );
-  }
+
   render() {
+    console.log(this.state)
     return (
       <Router>
         <div className="App">
@@ -265,6 +281,7 @@ class App extends Component {
                 <IndexPage
                   createCustomer={this.putCustomer}
                   data={this.state}
+                  setCustomerState={this.setCustomerState}
                 />
               }
             />
@@ -291,13 +308,14 @@ class App extends Component {
                   removeTicket={this.removeTicket}
                   putTicket={this.putTicket}
                   ticket={this.state.ticket}
+                  pushTicketToState={this.pushTicketToState}
                 />
               )}
             />
             <Route
               exact
               path="/tickets"
-              children={<TicketIndex tickets={this.state.filteredTickets} />}
+              children={<TicketIndex removeTicket={this.removeTicket} getTicket={this.getTicket} tickets={this.state.filteredTickets} />}
             />
             <Route
               path="/tickets/:id"
@@ -306,13 +324,17 @@ class App extends Component {
               ticket={this.state.ticket }
               tickets={this.state.tickets}
               {...routeProps} 
+              ticketNotes={this.state.ticketNotes}
+              removeNote={this.removeNote}
+              putNote={this.putNote}
+              updateTicket={this.updateTicket}
               />
               )}
             />
             <Route
               exact
               path="/notes"
-              children={<NoteIndex notes={this.state.filteredNotes} />}
+              children={<NoteIndex getTicket={this.getTicket} removeNote={this.removeNote} notes={this.state.filteredNotes} />}
             />
             <Route
               path="/customers/:id"

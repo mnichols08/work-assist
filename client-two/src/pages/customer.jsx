@@ -14,7 +14,7 @@ class Customer extends Component {
       customer: this.props.customer,
       customerTickets: this.props.customerTickets,
       tickets: this.props.tickets,
-      ticket: {}
+      ticket: {},
     };
     this.handleDelete = this.handleDelete.bind(this);
     this.newTicket = this.newTicket.bind(this);
@@ -31,14 +31,19 @@ class Customer extends Component {
   async newTicket(e) {
     e.stopPropagation();
     e.preventDefault();
-    
+
     const title = { title: e.target.title.value };
-    e.target.title.value = ''
+    e.target.title.value = "";
     const customerID = this.state.customer._id;
 
-    const ticket = await this.props.putTicket(title, customerID);
-   this.setState({ customerTickets: [...this.state.customerTickets, ticket.ticket], ticket: ticket.ticket })
-   
+    const t = await this.props.putTicket(title, customerID);
+    const ticket = t.ticket;
+    this.setState({
+      customerTickets: [...this.state.customerTickets, ticket],
+      ticket
+    });
+    this.props.history.push(`/tickets/${ticket._id}`);
+    this.props.pushTicketToState(ticket);
   }
   componentDidMount() {
     fetch("/customers/" + this.props.match.params.id, {
@@ -52,7 +57,7 @@ class Customer extends Component {
         this.setState({
           customer: blob.customer,
           customerTickets: blob.customerTickets,
-          tickets: blob
+          tickets: blob,
         })
       );
   }
@@ -60,7 +65,6 @@ class Customer extends Component {
     this.setState();
   }
   render() {
- 
     return (
       <div className="index" id={this.state.customer._id}>
         <h1>{this.state.customer.name}</h1>
@@ -74,9 +78,7 @@ class Customer extends Component {
         <div className="tickets">
           {this.state.customerTickets.map((ticket) => (
             <div key={ticket._id} className="ticket">
-              <Link to={`/tickets/${ticket._id}`}>
-                {ticket.title}
-              </Link>
+              <Link to={`/tickets/${ticket._id}`}>{ticket.title}</Link>
               <button
                 type="submit"
                 onClick={() => this.handleDelete(ticket._id)}

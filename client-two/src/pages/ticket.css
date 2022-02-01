@@ -1,0 +1,38 @@
+.tickets.page  ul {
+    list-style: none;
+}
+.tickets.page  li {
+    max-width: 25em;
+}
+.tickets.page  {
+    font-size: 62.5%;
+    font-family: sans-serif;
+}
+.tickets.page  form {
+    display: inline-block;
+}
+.tickets.page  button {
+    display: grid;
+    float: right;
+}
+.tickets.page  h1 {
+    font-size: 3em;
+}
+.tickets.page  h2 {
+    font-size: 2.5em;
+}
+.tickets.page  h3 {
+    font-size: 2em;
+}
+.tickets.page  h4 {
+    font-size: 1.5em;
+}
+.tickets.page  p {
+    display: inline-block;
+}
+.tickets.page  textarea {
+    min-height: 5rem;
+    max-height: 17.5em;
+    min-width: 17.5em;
+    max-width: 17.5em;
+}

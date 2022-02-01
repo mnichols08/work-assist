@@ -10,25 +10,25 @@ import { SearchBox } from "./search-box/search-box.component";
 import "./header.css";
 
 class Header extends Component {
-  constructor(props){
-    super(props)
-    this.handleChange = this.handleChange.bind(this)
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
   }
-    handleChange = e => {
-    this.props.setSearch(e.target.value)
-  }
+  handleChange = (e) => {
+    this.props.setSearch(e.target.value);
+  };
   render() {
     return (
       <header className="App-header">
         <div>
-        <Link to="/">
-          <code>tick.it</code>
-        </Link>
-        <SearchBox
-          placeholder={`Search ${this.props.getSearchFor}`}
-          handleChange={this.handleChange}
-          searchFor={this.props.getSearchFor}
-        />
+          <Link to="/">
+            <code>tick.it</code>
+          </Link>
+          <SearchBox
+            placeholder={`Search ${this.props.getSearchFor}`}
+            handleChange={this.handleChange}
+            searchFor={this.props.getSearchFor}
+          />
         </div>
         <nav>
           <Link
@@ -38,7 +38,6 @@ class Header extends Component {
           >
             Customers
           </Link>{" "}
-          {" "}
           <Link
             onClick={this.props.setTickets}
             to="/tickets"
@@ -46,7 +45,6 @@ class Header extends Component {
           >
             Tickets
           </Link>{" "}
-          {" "}
           <Link onClick={this.props.setNotes} to="/notes" className="App-link">
             Notes
           </Link>
