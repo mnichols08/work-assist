@@ -11,10 +11,10 @@ class Customer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      customer: this.props.customer,
-      customerTickets: this.props.customerTickets,
-      tickets: this.props.tickets,
-      ticket: {},
+      customer:{name: 'loading...'},
+      customerTickets: [],
+      tickets: [],
+      ticket: {}
     };
     this.handleDelete = this.handleDelete.bind(this);
     this.newTicket = this.newTicket.bind(this);
@@ -38,12 +38,12 @@ class Customer extends Component {
 
     const t = await this.props.putTicket(title, customerID);
     const ticket = t.ticket;
+
     this.setState({
       customerTickets: [...this.state.customerTickets, ticket],
       ticket
     });
     this.props.history.push(`/tickets/${ticket._id}`);
-    this.props.pushTicketToState(ticket);
   }
   componentDidMount() {
     fetch("/customers/" + this.props.match.params.id, {

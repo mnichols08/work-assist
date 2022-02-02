@@ -13,9 +13,9 @@ class Ticket extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      ticket: this.props.ticket,
-      ticketNotes: this.props.ticketNotes,
-      description: this.props.ticket.description,
+      ticket: {title: 'loading...'},
+      ticketNotes: [],
+      description: '',
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -49,7 +49,6 @@ class Ticket extends Component {
       description: e.target.description.value,
       title: e.target.title.value,
     };
-    console.log(update);
     const ticket = this.props.updateTicket(update, this.state.ticket._id);
     this.setState({ ticket });
   }

@@ -18,10 +18,11 @@ class Header extends Component {
     this.props.setSearch(e.target.value);
   };
   render() {
+
     return (
       <header className="App-header">
         <div>
-          <Link to="/">
+          <Link to="/" onClick={this.props.resetSearch}>
             <code>tick.it</code>
           </Link>
           <SearchBox

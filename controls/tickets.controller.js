@@ -6,7 +6,6 @@ const Customer = require('../models/customer.model')
 
 module.exports.index = async (req, res) => res.json({status: 'success', method: 'read', data: await Ticket.find()})
 module.exports.create = async (req, res) => {
-	console.log(req.body)
 	const ticket = await new Ticket(req.body)
 	const customer = await Customer.findById(req.params.id)
 	if (req.params.id) {
@@ -16,9 +15,10 @@ module.exports.create = async (req, res) => {
 		ticket.save()
 		
 		res.json({status: 'success', method: 'create ticket on customer with id of ' + req.params.id, customer, customerTickets: await Ticket.find({origin: customer._id}), tickets: await Ticket.find(), ticket})
-	}
+	} else {
 	ticket.save()
-	res.json({status: 'success', method: 'create ticket', data: ticket})
+	res.json({status: 'success', method: 'create ticket', ticket: ticket})
+	}
 }
 module.exports.read = async (req, res) => {
 	const ticketID = req.params.id
