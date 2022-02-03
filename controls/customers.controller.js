@@ -19,6 +19,7 @@ module.exports.read = async (req, res) => {
   else res.json({status: 'success', method: 'Customer Index', data: await Customer.find()})
 }
 module.exports.update = async (req, res) => {
+  console.log(req.body)
   const method = 'Update Customer'
   const info = await Customer.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) }, req.body)
   const customer = await Customer.findById(req.params.id)

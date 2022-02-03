@@ -44,6 +44,8 @@ class App extends Component {
     this.getTickets = this.getTickets.bind(this);
     this.getTicket = this.getTicket.bind(this);
     this.putTicket = this.putTicket.bind(this);
+    this.updateTicket = this.updateTicket.bind(this);
+    this.updateTicketOrigin = this.updateTicketOrigin.bind(this);
     this.removeTicket = this.removeTicket.bind(this);
     this.setNotes = this.setNotes.bind(this);
     this.getNotes = this.getNotes.bind(this);
@@ -51,6 +53,7 @@ class App extends Component {
     this.putNote = this.putNote.bind(this);
     this.setSearch = this.setSearch.bind(this);
     this.resetSearch = this.resetSearch.bind(this);
+    this.updateNote = this.updateNote.bind(this)
   }
   resetSearch() {
     this.setState({ searchFor: "" });
@@ -72,8 +75,8 @@ class App extends Component {
       .then((response) => response.json())
       .then((blob) => this.setState({ customers: blob.data }));
   }
-  getCustomer(id) {
-    fetch("/customers/" + id, {
+  async getCustomer(id) {
+    await fetch("/customers/" + id, {
       method: "GET",
       headers: {
         authkey: CLIENT_API,
@@ -86,6 +89,7 @@ class App extends Component {
           customerTickets: blob.customerTickets,
         })
       );
+    return this.state.customer;
   }
   setCustomerID(id) {
     this.setState({ customer: { _id: id } });
@@ -124,6 +128,21 @@ class App extends Component {
         this.setState({ tickets: blob.tickets, customers: blob.data })
       );
   }
+  async updateCustomer(newCustomer, id) {
+    const newState = await fetch("/customers/" + id, {
+      method: "PATCH",
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newCustomer),
+    })
+      .then((response) => response.json())
+      .then((blob) => {
+        return { customer: blob.data };
+      });
+    return newState;
+  }
   setTickets() {
     this.setState({ searchFor: "tickets" });
   }
@@ -148,18 +167,40 @@ class App extends Component {
       .then((blob) => blob.data);
   }
   async updateTicket(newTicket, id) {
-    const newState = await fetch("/tickets/" + id, {
-      method: "patch",
+    const plusId = id.length > 0 ? `/${id}` : null
+    const ticket = await fetch("/tickets" + plusId, {
+      method: "PATCH",
       headers: {
         authkey: CLIENT_API,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(newTicket),
     })
       .then((response) => response.json())
-      .then((blob) => {
-        return { ticket: blob.ticket };
-      });
-    return newState;
+      .then((blob) => blob.ticket)
+      ;
+
+    this.setState( ticket );
+
+    return ticket;
+  }
+  async updateTicketOrigin(ticketID, customerID) {
+    if (customerID !== 'Assign Customer' || customerID !== null || customerID !== '') {
+      const newState = await fetch(`/tickets/${ticketID}/${customerID}`, {
+        method: "PATCH",
+        headers: {
+          authkey: CLIENT_API,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((blob) => {
+          return { ticket: blob.ticket };
+        });
+        this.setState({ticket: newState})
+    
+        return newState
+      }
   }
   async removeTicket(id) {
     const newState = await fetch("/tickets/" + id, {
@@ -173,6 +214,7 @@ class App extends Component {
         return {
           customer: blob.customer,
           customerTickets: blob.customerTickets,
+          tickets: blob.tickets,
         };
       });
     this.setState(newState);
@@ -245,6 +287,27 @@ class App extends Component {
     return createNote;
   }
 
+  async updateNote(newNote, id) {
+    console.log(newNote, id)
+    const plusId = id.length > 0 ? `/${id}` : null
+    console.log(plusId)
+    const note = await fetch("/notes" + plusId, {
+      method: "PATCH",
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newNote),
+    })
+      .then((response) => response.json())
+      .then((blob) => blob)
+      ;
+      console.log(note)
+    this.setState( note );
+    console.log(note)
+    return note;
+  }
+
   componentDidMount() {
     fetch("/open")
       .then((response) => response.json())
@@ -302,6 +365,7 @@ class App extends Component {
                   putTicket={this.putTicket}
                   ticket={this.state.ticket}
                   pushTicketToState={this.pushTicketToState}
+                  saveCustomer={this.updateCustomer}
                 />
               )}
             />
@@ -323,13 +387,18 @@ class App extends Component {
               path="/tickets/:id"
               render={(routeProps) => (
                 <Ticket
+                  updateOrigin={this.updateTicketOrigin}
+                  customer={this.getCustomer}
+                  customers={this.state.customers}
+                  removeTicket={this.removeTicket}
                   ticket={this.state.ticket}
                   tickets={this.state.tickets}
                   {...routeProps}
                   ticketNotes={this.state.ticketNotes}
                   removeNote={this.removeNote}
                   putNote={this.putNote}
-                  updateTicket={this.updateTicket}
+                  saveTicket={this.updateTicket}
+                  updateNote={this.updateNote}
                 />
               )}
             />

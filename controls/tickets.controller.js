@@ -23,20 +23,20 @@ module.exports.create = async (req, res) => {
 module.exports.read = async (req, res) => {
 	const ticketID = req.params.id
 	const ticket = await Ticket.findById(ticketID)
+	let ticketCustomer
+	if (ticket.origin) ticketCustomer = await Customer.findById({_id: ticket.origin})
 	if (!ticket) {
 		res.json( {status: 'fail', method: 'read', ticket} )
-	} else res.json({status: 'success', method: 'get one ticket', ticket, ticketNotes: await Note.find({origin: ticketID})})
+	} else res.json({status: 'success', method: 'get one ticket', ticketCustomer, ticket, ticketNotes: await Note.find({origin: ticketID})})
 }
 
 module.exports.updateTicket = async (req, res) => {
-	console.log(req.body)
-	const { id, customerID } = req.params
+	const { id, noteID} = req.params
 		const oldTicket = await Ticket.findById(id)
 		const customers = await Customer.find()
-		
+		let oldTicketOrigin = oldTicket.origin
 		oldTicket.origin = undefined
 		oldTicket.save()
-
 		customers.map(async customerID => {
 			const oldCustomer = await Customer.findById(customerID)
 			if (oldCustomer.tickets.includes(id)) {
@@ -46,24 +46,33 @@ module.exports.updateTicket = async (req, res) => {
 		})	
 		await Ticket.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
 		const ticket = await Ticket.findById(id)
-		ticket.origin = customerID
-		ticket.save()
+		let newCustomer
+		ticket.origin = oldTicketOrigin
+		if (noteID) {
+			newCustomer = await Customer.findById(noteID)
+			newCustomer.tickets.push(id)
+			newCustomer.save()
+			ticket.origin = noteID
+			
+		}
 		
-		const newCustomer = await Customer.findById(customerID)
-		newCustomer.tickets.push(id)
-		newCustomer.save()
-		res.json({status: 'success', method: 'update ticket origin', data: await Ticket.find()})
+		ticket.save()
+		console.log(oldTicketOrigin, noteID)
+		res.json({status: 'success', method: 'update ticket origin', ticketOrigin: oldTicketOrigin, ticket: await Ticket.findById(id), data: await Ticket.find()})
 }
 
 module.exports.update = async (req, res) => {
+	console.log(req.params)
 	if (req.params.customer) {
+		
 		const customer = await Customer.findById(req.params.customer)
+		console.log(customer.name)
 		await Ticket.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) },req.body)
 		const ticket = await Ticket.findById(req.params.id)
 		ticket.origin = customer._id
 		if (customer !== null) await Customer.findByIdAndUpdate(req.params.customer), { $push: { tickets: ticket._id}}
 		customer.save()
-		res.json({status: 'success', method: 'update ticket origin', data: await Ticket.find()})
+		res.json({status: 'success', method: 'update ticket origin', ticket, data: await Ticket.find()})
 		}
 	
 	// const customer = Customer.findById(req.params.customer)

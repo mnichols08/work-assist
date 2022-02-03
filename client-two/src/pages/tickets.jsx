@@ -28,10 +28,10 @@ class TicketIndex extends Component {
 
     input.target.title.value = "";
     input.target.description.value = "";
-    input.target.customer.value = "New Customer";
+    input.target.customer.value = "No Customer";
 
     if (
-      customer === "New Customer" ||
+      customer === "No Customer" ||
       !customer ||
       customer === null ||
       customer == undefined
@@ -49,6 +49,7 @@ class TicketIndex extends Component {
       tickets: this.state.tickets.filter((ticket) => ticket._id !== id),
     });
   }
+ 
   componentDidMount() {
     fetch("/tickets")
       .then((response) => response.json())
@@ -98,9 +99,9 @@ class TicketIndex extends Component {
             </div>
             <div>
               <label>Customer:</label>
-              <select name="customer" defaultValue="New Customer">
+              <select name="customer" defaultValue="No Customer">
                 <option key="placeholder" disabled>
-                  New Customer
+                  No Customer
                 </option>
                 {this.props.customers.map((customer) => (
                   <option key={customer._id} value={customer._id}>

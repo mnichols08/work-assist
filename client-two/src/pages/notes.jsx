@@ -29,10 +29,10 @@ class NoteIndex extends Component {
 
     input.target.title.value = "";
     input.target.context.value = "";
-    input.target.ticket.value = 'New Ticket'
+    input.target.ticket.value = 'No Ticket'
 
     if (
-      ticket === "New Ticket" ||
+      ticket === "No Ticket" ||
       !ticket ||
       ticket === null ||
       ticket == undefined
@@ -99,9 +99,9 @@ class NoteIndex extends Component {
             ></textarea>
             <div>
               <label>Ticket:</label>
-              <select name="ticket" defaultValue='New Ticket'>
+              <select name="ticket" defaultValue='No Ticket'>
                 <option key="placeholder" disabled>
-                  New Ticket
+                  No Ticket
                 </option>
                 {this.props.tickets.map((ticket) => (
                   <option key={ticket._id} value={ticket._id}>
