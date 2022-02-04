@@ -23,6 +23,7 @@ class App extends Component {
     super(props);
     this.state = {
       customer: {},
+      customers: [],
       customerTickets: [],
       ticket: {},
       ticketNotes: [],
@@ -195,10 +196,10 @@ class App extends Component {
       })
         .then((response) => response.json())
         .then((blob) => {
-          return { ticket: blob.ticket };
+          return {customers: blob.customers, tickets: blob.tickets, ticket: blob.ticket, customer: blob.customer};
         });
-        this.setState({ticket: newState})
-    
+        this.setState({ticket: newState.ticket, tickets: newState.tickets, customers: newState.customers })
+        console.log(newState)
         return newState
       }
   }
@@ -235,8 +236,12 @@ class App extends Component {
           customerTickets: blob.customerTickets,
           tickets: blob.tickets,
           ticket: blob.ticket,
+          customers: blob.customers
         };
       });
+      console.log(newState)
+    this.setState({customers: newState.customers, customerTickets: newState.customerTickets})
+    
     return newState;
   }
   pushTicketToState(ticket) {
@@ -284,13 +289,13 @@ class App extends Component {
     })
       .then((response) => response.json())
       .then((blob) => blob);
+      
     return createNote;
   }
 
   async updateNote(newNote, id) {
     console.log(newNote, id)
     const plusId = id.length > 0 ? `/${id}` : null
-    console.log(plusId)
     const note = await fetch("/notes" + plusId, {
       method: "PATCH",
       headers: {
@@ -302,10 +307,8 @@ class App extends Component {
       .then((response) => response.json())
       .then((blob) => blob)
       ;
-      console.log(note)
-    this.setState( note );
-    console.log(note)
-    return note;
+    this.setState( {note: note.note, notes: note.notes, ticketNotes: note.ticketNotes} );
+      return {note: note.note, notes: note.notes, ticketNotes: note.ticketNotes};
   }
 
   componentDidMount() {

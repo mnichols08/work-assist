@@ -14,7 +14,7 @@ module.exports.create = async (req, res) => {
 		customer.save()
 		ticket.save()
 		
-		res.json({status: 'success', method: 'create ticket on customer with id of ' + req.params.id, customer, customerTickets: await Ticket.find({origin: customer._id}), tickets: await Ticket.find(), ticket})
+		res.json({status: 'success', method: 'create ticket on customer with id of ' + req.params.id, customers: await Customer.find(), customer, customerTickets: await Ticket.find({origin: customer._id}), tickets: await Ticket.find(), ticket})
 	} else {
 	ticket.save()
 	res.json({status: 'success', method: 'create ticket', ticket: ticket})
@@ -27,7 +27,7 @@ module.exports.read = async (req, res) => {
 	if (ticket.origin) ticketCustomer = await Customer.findById({_id: ticket.origin})
 	if (!ticket) {
 		res.json( {status: 'fail', method: 'read', ticket} )
-	} else res.json({status: 'success', method: 'get one ticket', ticketCustomer, ticket, ticketNotes: await Note.find({origin: ticketID})})
+	} else res.json({status: 'success', method: 'get one ticket', ticketCustomer, customers: await Customer.find(), ticket, ticketNotes: await Note.find({origin: ticketID})})
 }
 
 module.exports.updateTicket = async (req, res) => {
@@ -52,13 +52,13 @@ module.exports.updateTicket = async (req, res) => {
 			newCustomer = await Customer.findById(noteID)
 			newCustomer.tickets.push(id)
 			newCustomer.save()
-			ticket.origin = noteID
+			ticket.origin = noteID || oldTicketOrigin
 			
 		}
 		
 		ticket.save()
-		console.log(oldTicketOrigin, noteID)
-		res.json({status: 'success', method: 'update ticket origin', ticketOrigin: oldTicketOrigin, ticket: await Ticket.findById(id), data: await Ticket.find()})
+		console.log(ticket)
+		res.json({status: 'success', method: 'update ticket origin', customer: await Customer.findById(ticket.origin), customers: await Customer.find(), ticket, tickets: await Ticket.find()})
 }
 
 module.exports.update = async (req, res) => {
@@ -72,7 +72,7 @@ module.exports.update = async (req, res) => {
 		ticket.origin = customer._id
 		if (customer !== null) await Customer.findByIdAndUpdate(req.params.customer), { $push: { tickets: ticket._id}}
 		customer.save()
-		res.json({status: 'success', method: 'update ticket origin', ticket, data: await Ticket.find()})
+		res.json({status: 'success', method: 'update ticket origin', customers: await Customer.find(), ticket, tickets: await Ticket.find()})
 		}
 	
 	// const customer = Customer.findById(req.params.customer)
@@ -93,7 +93,7 @@ const ticket = await Ticket.findById(req.params.id)
 		const customerID = ticket.origin
 		await Customer.findByIdAndUpdate(customerID, { $pull: { tickets: req.params.id }})
 		await ticket.delete()
-		res.json({status: 'success', method: 'remove ticket with id of ' + req.params.id, customer: await Customer.findById(customerID), tickets: await Ticket.find()})
+		res.json({status: 'success', method: 'remove ticket with id of ' + req.params.id, customerTickets: await Ticket.find({origin: customerID}), customer: await Customer.findById(customerID), tickets: await Ticket.find()})
 	}
 	else {
 		await Customer.updateMany({tickets: []})	

@@ -56,7 +56,8 @@ class CustomerIndex extends Component {
   render() {
     const { customers, searchField } = this.state;
     let filteredCustomers;
-    //if (this.state.customers > 3) this.setState({ newCustomerField: false });
+    if (this.state.customers > 3) this.setState({ newCustomerField: false });
+    filteredCustomers = customers.sort((a, b) => (a.name > b.name) ? 1 : -1 )
     try {
       filteredCustomers = customers.filter((o) =>
         Object.keys(o).some((k) => {
@@ -81,7 +82,7 @@ class CustomerIndex extends Component {
             <h2>Create Customer</h2>
             <div>
               <label>Name </label>
-              <input name="name" type="text" />
+              <input autoFocus name="name" type="text" />
             </div>
             <div>
               <label>Phone: </label>

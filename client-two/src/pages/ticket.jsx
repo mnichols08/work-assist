@@ -13,11 +13,13 @@ class Ticket extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      customers: this.props.customers || [],
       ticket: { title: "loading...", id: "" },
       ticketNotes: [],
       ticketCustomer: {},
-      showEditField: { title: false, description: false, note: false },
-      showAssignCustomer: false,
+      noteID: '',
+      showEditField: { title: false, description: false, note: false, assignCustomer: false }
+
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -30,17 +32,18 @@ class Ticket extends Component {
     this.assignCustomer = this.assignCustomer.bind(this);
     this.showEditNote = this.showEditNote.bind(this);
     this.updateNote = this.updateNote.bind(this)
+    this.cancelEditNote = this.cancelEditNote.bind(this)
   }
   showAssignCustomer(e) {
     e.preventDefault();
     e.stopPropagation();
-    this.setState({ showAssignCustoemer: true });
+    this.setState({ showEditField: {assignCustomer: true }});
   }
   showDescEdit() {
     this.setState({ showEditField: { description: true } });
   }
   showTitleEdit() {
-    this.setState({ showEditField: { title: true } });
+    this.setState({ showEditField: { title: true} });
   }
 
   cancelTitle() {
@@ -49,18 +52,23 @@ class Ticket extends Component {
   cancelDesc() {
     this.setState({ showEditField: { description: false } });
   }
+  cancelEditNote(){
+    this.setState({ showEditField: {note: false}})
+  }
 
   async updateNote(e) {
     e.preventDefault();
     e.stopPropagation();
-    //const note = this.props.updateNote(e.target.title.value, e.target.title.id)
-    const note = {[e.target.title.name]: e.target.title.value}
+    
+    const title = e.target.title.value
+    const context = e.target.context.value
+    const note = {title, context}
     const id = e.target.id
     this.setState({showEditField: {note: false}})
     
     const newNote = await this.props.updateNote(note, id)
-    console.log(newNote)
-    return newNote
+    this.setState({note: this.props.note, ticketNotes: this.props.ticketNotes, notes: this.props.notes})
+
   }
 
   handleChange(e) {
@@ -84,8 +92,8 @@ class Ticket extends Component {
     e.target.title.value = "";
     e.target.context.value = "";
   }
-  showEditNote() {
-    this.setState({ showEditField: { note: true } });
+  showEditNote(e) {
+    this.setState({ noteID: e, showEditField: { note: true } });
   }
   async saveTicket(input) {
     input.stopPropagation();
@@ -114,13 +122,14 @@ class Ticket extends Component {
     });
   }
   async assignCustomer(e) {
-    // e.preventDefault();
-    // e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
     const ticketID = this.state.ticket._id;
     const customerID = e.target.customer.value;
     const updatedTicket = await this.props.updateOrigin(ticketID, customerID);
-    this.setState({ ticket: updatedTicket });
+    this.setState({ ticketCustomer: updatedTicket.customer, ticket: updatedTicket.ticket, showEditField: { assignCustomer: false} });
   }
+
   componentDidMount() {
     if (this.state.ticketNotes.length < 0) return;
     else
@@ -154,7 +163,7 @@ class Ticket extends Component {
             ) : (
               <Link to="/tickets">To Tickets</Link>
             )}
-            {this.state.showAssignCustoemer === true ||
+            {this.state.showEditField.assignCustomer === true ||
             this.state.ticket.origin === undefined ? (
               <form onSubmit={this.assignCustomer}>
                 <select name="customer" defaultValue="Assign Customer">
@@ -245,26 +254,40 @@ class Ticket extends Component {
           {ticketNotes.map((note) => (
             <div key={note._id}>
               <h4>
-                {this.state.showEditField.note === true ? (
+                {this.state.showEditField.note === true && this.state.noteID == note._id ? (
                   <form onSubmit={this.updateNote} id={note._id}>
-                    <input type="text" defaultValue={note.title} name="title" />
+                    <input defaultValue={note.title} type="text" name="title" placeholder="enter a note" />
+                <select name="type" id="type">
+                  <option value="note">Note</option>
+                  <option value="todo" disabled>
+                    To Do
+                  </option>
+                </select>
+                <br />
+                <textarea
+                  defaultValue={note.context}
+                  name="context"
+                  placeholder="provide some more detail (optional)"
+                ></textarea>
+                <button type="submit">Submit</button>
+                <button onClick={this.cancelEditNote}>Cancel</button>
                   </form>
                 ) : (
-                  <>{note.title}</>
+                  <>{note.title} <br/>
+                  {note.context}</>
                 )}{" "}
-                <Link to="#" onClick={this.showEditNote}>{` / `}</Link> |{" "}
+                <Link to="#" onClick={() => this.showEditNote(note._id)}>{` / `}</Link> |{" "}
                 <Link
                   to="#"
                   onClick={() => this.deleteNote(note._id)}
                 >{` x `}</Link>{" "}
               </h4>
-              <p>{note.context}</p>
+              
             </div>
           ))}
           <form onSubmit={this.handleSubmit}>
             <h4>Create Note</h4>
-            <ul>
-              <li>
+      
                 <input type="text" name="title" placeholder="enter a note" />
                 <select name="type" id="type">
                   <option value="note">Note</option>
@@ -278,8 +301,7 @@ class Ticket extends Component {
                   placeholder="provide some more detail (optional)"
                 ></textarea>
                 <button type="submit">Submit</button>{" "}
-              </li>
-            </ul>
+     
           </form>
         </div>
       </div>

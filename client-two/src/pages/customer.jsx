@@ -55,22 +55,18 @@ class Customer extends Component {
     });
     this.props.history.push(`/tickets/${ticket._id}`);
   }
-  async saveCustomer(input){
+  saveCustomer(input){
     input.stopPropagation()
     input.preventDefault()
-    let customer
     if (input.target.name){
 
-    customer = await this.props.saveCustomer({name: input.target.name.value}, this.state.customer._id)
-    this.setState({showEditField: {name: false}})
+    const customer = this.props.saveCustomer({name: input.target.name.value}, this.state.customer._id)
   }
     if (input.target.phone) {
 
-      customer = await this.props.saveCustomer({phone: input.target.phone.value}, this.state.customer._id)
-      this.setState({showEditField: {phone: false}})
+      this.props.saveCustomer({phone: input.target.phone.value}, this.state.customer._id)
     }
-    console.log(customer)
-    this.setState(customer)
+    
   }
   componentDidMount() {
     fetch("/customers/" + this.props.match.params.id, {

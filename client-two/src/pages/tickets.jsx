@@ -10,12 +10,12 @@ import {
 class TicketIndex extends Component {
   constructor(props) {
     super(props);
-    this.state = { tickets: [], searchField: "", showNewField: false };
+    this.state = { tickets: [], searchField: "", showEditField: {new: false} };
     this.showNewField = this.showNewField.bind(this);
     this.createTicket = this.createTicket.bind(this);
   }
   showNewField() {
-    this.setState({ showNewField: true });
+    this.setState({ showEditField: {new: true} });
   }
   async createTicket(input) {
     input.preventDefault();
@@ -86,12 +86,12 @@ class TicketIndex extends Component {
     return (
       <main className="index">
         <h1>Ticket Index</h1>
-        {this.state.showNewField == true || this.state.tickets.length < 2 ? (
+        {this.state.showEditField.new == true || this.state.tickets.length < 2 ? (
           <form onSubmit={this.createTicket} className="createNote">
             <h4>Create Ticket</h4>
             <div>
               <label>Title </label>
-              <input name="title" type="text" />
+              <input autoFocus name="title" type="text" />
             </div>
             <div>
               <label>Description: </label>

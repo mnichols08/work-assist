@@ -17,7 +17,7 @@ module.exports.create = async (req, res) => {
 }
 module.exports.read = async (req, res) => res.json({status: 'success', method: 'index', data: await Note.findById(req.params.id)} )
 
-module.exports.updateTicket = async (req, res) => {
+module.exports.updateNote = async (req, res) => {
 	const { id, ticketID } = req.params
 		const oldNote = await Note.findById(id)
 		const tickets = await Ticket.find()
@@ -53,6 +53,16 @@ module.exports.update = async (req, res) => {
 		ticket.save()
 		res.json({status: 'success', method: 'update note origin', data: note})
 		}
+		else {
+			
+			await Note.updateOne({ _id: mongoose.Types.ObjectId(req.params.id) }, req.body) }
+			const note = await Note.findById(req.params.id)
+			if (note.origin !== null || note.origin !== undefined || note.origin !== '') {
+			 await Ticket.findByIdAndUpdate(note.origin), { $push: { notes: note._id}
+			}
+			
+			res.json({status: 'success', method: 'update note', note, notes: await Note.find(), ticketNotes: await Note.find({origin: note.origin})})
+	}
 	
 	// const ticket = Ticket.findById(req.params.ticket)
 	// if (ticket && ticket !== null) {
@@ -63,7 +73,7 @@ module.exports.update = async (req, res) => {
 	// 	ticket.save()
 	// 	res.json(ticket)
 	// } else 
-	
+		
 }
 
 module.exports.remove = async (req, res) => {
