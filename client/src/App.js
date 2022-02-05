@@ -1,57 +1,74 @@
 import React, { Component } from "react";
-import { Route, Switch } from "react-router-dom";
-import { TransitionGroup, CSSTransition } from "react-transition-group";
-import Ticket from "./components/ticket/component";
-import Customer from "./components/customer/component";
-import MonoTicket from "./components/ticket/mono";
-import TicketIndex from "./components/ticket";
-import CustomerIndex from "./components/customer";
-import seed from "./components/ticket/seed";
-import NewTicketForm from "./components/ticket/new";
-import NewCustomerForm from "./components/customer/new";
-import { generateTicket } from "./components/ticket/helper";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams,
+} from "react-router-dom";
 
-import Page from "./components/page";
+import Header from "./page/header";
+import Footer from "./page/footer";
+import IndexPage from "./pages/index";
+import CustomerIndex from "./pages/customers";
+import Customer from "./pages/customer";
+import TicketIndex from "./pages/tickets";
+import Ticket from "./pages/ticket";
+import NoteIndex from "./pages/notes";
+import "./App.css";
 
-const CLIENT_API = process.env.REACT_APP_CLIENT_API;
-
+const CLIENT_API = process.env.CLIENT_API || null;
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { customers: [], customer: {}, tickets: [], notes: [] };
-    this.saveTicket = this.saveTicket.bind(this);
-    this.saveCustomer = this.saveCustomer.bind(this);
-    this.findTicket = this.findTicket.bind(this);
-    this.findCustomer = this.findCustomer.bind(this);
-    this.deleteTicket = this.deleteTicket.bind(this);
-    this.deleteCustomer = this.deleteCustomer.bind(this);
+    this.state = {
+      customer: {},
+      customers: [],
+      customerTickets: [],
+      ticket: {},
+      ticketNotes: [],
+      note: {},
+      customers: [],
+      tickets: [],
+      notes: [],
+      searchFor: "",
+      searchField: "",
+    };
+
+    this.setCustomerID = this.setCustomerID.bind(this);
+    this.setCustomers = this.setCustomers.bind(this);
+    this.getCustomers = this.getCustomers.bind(this);
+    this.getCustomer = this.getCustomer.bind(this);
+    this.putCustomer = this.putCustomer.bind(this);
+    this.removeCustomer = this.removeCustomer.bind(this);
+    this.setTickets = this.setTickets.bind(this);
+    this.getTickets = this.getTickets.bind(this);
+    this.getTicket = this.getTicket.bind(this);
+    this.putTicket = this.putTicket.bind(this);
+    this.updateTicket = this.updateTicket.bind(this);
+    this.updateTicketOrigin = this.updateTicketOrigin.bind(this);
+    this.removeTicket = this.removeTicket.bind(this);
+    this.setNotes = this.setNotes.bind(this);
+    this.getNotes = this.getNotes.bind(this);
+    this.getNote = this.getNote.bind(this);
+    this.putNote = this.putNote.bind(this);
+    this.setSearch = this.setSearch.bind(this);
+    this.resetSearch = this.resetSearch.bind(this);
+    this.updateNote = this.updateNote.bind(this)
   }
-  findCustomer(id) {
-    fetch("/customers/" + id, {
+  resetSearch() {
+    this.setState({ searchFor: "" });
+  }
+  setSearch(searchField) {
+    this.setState({ searchField });
+  }
+
+  setCustomers() {
+    this.setState({ searchFor: "customers" });
+  }
+  getCustomers() {
+    fetch("/customers", {
       method: "GET",
-      headers: {
-        authkey: CLIENT_API,
-      },
-    })
-      .then((response) => response.json())
-      .then((blob) => this.setState({ customer: blob.data }));
-    console.log(this.state);
-  }
-  findTicket(id) {
-    return this.state.tickets.find(function (ticket) {
-      return ticket.id === id;
-    });
-  }
-  deleteTicket(id) {
-    this.setState(
-      (st) => ({ tickets: st.tickets.filter((ticket) => ticket.id !== id) }),
-      this.syncLocalStorage
-    );
-  }
-  deleteCustomer(id) {
-    const path = `/customers/${id}`;
-    fetch(path, {
-      method: "DELETE",
       headers: {
         authkey: CLIENT_API,
       },
@@ -59,9 +76,62 @@ class App extends Component {
       .then((response) => response.json())
       .then((blob) => this.setState({ customers: blob.data }));
   }
-  saveCustomer(newCustomer) {
-    fetch("/customers", {
+  async getCustomer(id) {
+    await fetch("/customers/" + id, {
+      method: "GET",
+      headers: {
+        authkey: CLIENT_API,
+      },
+    })
+      .then((response) => response.json())
+      .then((blob) =>
+        this.setState({
+          customer: blob.customer,
+          customerTickets: blob.customerTickets,
+        })
+      );
+    return this.state.customer;
+  }
+  setCustomerID(id) {
+    this.setState({ customer: { _id: id } });
+  }
+  async putCustomer(newCustomer) {
+    const newState = await fetch("/customers/", {
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
       method: "POST",
+      body: JSON.stringify(newCustomer),
+    })
+      .then((response) => response.json())
+      .then((blob) => {
+        return { customers: blob.customers, customer: blob.customer };
+      });
+    //this.setState(newState)
+    return newState;
+  }
+  // setCustomerState(customer){
+  //   if (customer && this.state.customers.length > 0)
+  //    this.setState({customers: [...this.state.customer, customer]})
+
+  // }
+  removeCustomer(id) {
+    fetch("/customers/" + id, {
+      method: "DELETE",
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((blob) =>
+        this.setState({ tickets: blob.tickets, customers: blob.data })
+      );
+  }
+  async updateCustomer(newCustomer, id) {
+    const newState = await fetch("/customers/" + id, {
+      method: "PATCH",
       headers: {
         authkey: CLIENT_API,
         "Content-Type": "application/json",
@@ -69,38 +139,15 @@ class App extends Component {
       body: JSON.stringify(newCustomer),
     })
       .then((response) => response.json())
-      .then((blob) => this.setState({ customers: blob.data }));
+      .then((blob) => {
+        return { customer: blob.data };
+      });
+    return newState;
   }
-  saveTicket(newTicket) {
-    fetch("/tickets/" + newTicket.customerID, {
-      method: "POST",
-      headers: {
-        authkey: CLIENT_API,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newTicket.ticket),
-    })
-      .then((response) => response.json())
-      .then((blob) => this.setState({ tickets: blob.data }));
+  setTickets() {
+    this.setState({ searchFor: "tickets" });
   }
-  syncLocalStorage() {
-    window.localStorage.setItem(
-      "customers",
-      JSON.stringify(this.state.customers)
-    );
-    window.localStorage.setItem("tickets", JSON.stringify(this.state.tickets));
-    window.localStorage.setItem("notes", JSON.stringify(this.state.notes));
-  }
-  componentDidMount() {
-    fetch("/customers", {
-      method: "GET",
-      headers: {
-        authkey: CLIENT_API,
-      },
-    })
-      .then((response) => response.json())
-      .then((blob) => this.setState({ customers: blob.data }));
-
+  getTickets() {
     fetch("/tickets", {
       method: "GET",
       headers: {
@@ -109,7 +156,101 @@ class App extends Component {
     })
       .then((response) => response.json())
       .then((blob) => this.setState({ tickets: blob.data }));
+  }
+  getTicket(id) {
+    fetch("/tickets/" + id, {
+      method: "GET",
+      headers: {
+        authkey: CLIENT_API,
+      },
+    })
+      .then((response) => response.json())
+      .then((blob) => blob.data);
+  }
+  async updateTicket(newTicket, id) {
+    const plusId = id.length > 0 ? `/${id}` : null
+    const ticket = await fetch("/tickets" + plusId, {
+      method: "PATCH",
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newTicket),
+    })
+      .then((response) => response.json())
+      .then((blob) => blob.ticket)
+      ;
 
+    this.setState( ticket );
+
+    return ticket;
+  }
+  async updateTicketOrigin(ticketID, customerID) {
+    if (customerID !== 'Assign Customer' || customerID !== null || customerID !== '') {
+      const newState = await fetch(`/tickets/${ticketID}/${customerID}`, {
+        method: "PATCH",
+        headers: {
+          authkey: CLIENT_API,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((blob) => {
+          return {customers: blob.customers, tickets: blob.tickets, ticket: blob.ticket, customer: blob.customer};
+        });
+        this.setState({ticket: newState.ticket, tickets: newState.tickets, customers: newState.customers })
+        console.log(newState)
+        return newState
+      }
+  }
+  async removeTicket(id) {
+    const newState = await fetch("/tickets/" + id, {
+      method: "DELETE",
+      headers: {
+        authkey: CLIENT_API,
+      },
+    })
+      .then((response) => response.json())
+      .then((blob) => {
+        return {
+          customer: blob.customer,
+          customerTickets: blob.customerTickets,
+          tickets: blob.tickets,
+        };
+      });
+    this.setState(newState);
+  }
+  async putTicket(newTicket, customerID) {
+    const newState = await fetch("/tickets/" + customerID, {
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(newTicket),
+    })
+      .then((response) => response.json())
+      .then((blob) => {
+        return {
+          customer: blob.customer,
+          customerTickets: blob.customerTickets,
+          tickets: blob.tickets,
+          ticket: blob.ticket,
+          customers: blob.customers
+        };
+      });
+      console.log(newState)
+    this.setState({customers: newState.customers, customerTickets: newState.customerTickets})
+    
+    return newState;
+  }
+  pushTicketToState(ticket) {
+    this.setState({ tickets: [...this.state.tickets, ticket] });
+  }
+  setNotes() {
+    this.setState({ searchFor: "notes" });
+  }
+  getNotes() {
     fetch("/notes", {
       method: "GET",
       headers: {
@@ -119,115 +260,173 @@ class App extends Component {
       .then((response) => response.json())
       .then((blob) => this.setState({ notes: blob.data }));
   }
+  getNote(id) {
+    fetch("/notes/" + id, {
+      method: "GET",
+      headers: {
+        authkey: CLIENT_API,
+      },
+    })
+      .then((response) => response.json())
+      .then((blob) => this.setState({ note: blob.data }));
+  }
+  removeNote(id) {
+    fetch("/notes/" + id, {
+      method: "DELETE",
+      headers: {
+        authkey: CLIENT_API,
+      },
+    }).then((response) => response.json());
+  }
+  async putNote(newNote, ticketID) {
+    const createNote = await fetch("/notes/" + ticketID, {
+      method: "POST",
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newNote),
+    })
+      .then((response) => response.json())
+      .then((blob) => blob);
+      
+    return createNote;
+  }
+
+  async updateNote(newNote, id) {
+    console.log(newNote, id)
+    const plusId = id.length > 0 ? `/${id}` : null
+    const note = await fetch("/notes" + plusId, {
+      method: "PATCH",
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newNote),
+    })
+      .then((response) => response.json())
+      .then((blob) => blob)
+      ;
+    this.setState( {note: note.note, notes: note.notes, ticketNotes: note.ticketNotes} );
+      return {note: note.note, notes: note.notes, ticketNotes: note.ticketNotes};
+  }
+
+  componentDidMount() {
+    fetch("/open")
+      .then((response) => response.json())
+      .then((blob) =>
+        this.setState({
+          customers: blob.state.customers,
+          tickets: blob.state.tickets,
+          notes: blob.state.notes,
+        })
+      );
+  }
 
   render() {
     return (
-      <Route
-        render={({ location }) => (
-          <TransitionGroup>
-            <CSSTransition key={location.key} classNames="page" timeout={500}>
-              <Switch location={location}>
-                <Route
-                  exact
-                  path="/ticket/new"
-                  render={(routeProps) => (
-                    <Page>
-                      <NewTicketForm
-                        saveTicket={this.saveTicket}
-                        tickets={this.state.tickets}
-                        {...routeProps}
-                      />
-                    </Page>
-                  )}
+      <Router>
+        <div className="App">
+          <Header
+            goHome={this.goHome}
+            setCustomers={this.setCustomers}
+            setTickets={this.setTickets}
+            setNotes={this.setNotes}
+            resetSearch={this.resetSearch}
+            getSearchFor={this.state.searchFor}
+            setSearch={this.setSearch}
+          />
+          <Switch>
+            <Route
+              exact
+              path="/"
+              children={<IndexPage createCustomer={this.putCustomer} />}
+            />
+            <Route
+              exact
+              path="/customers"
+              render={(routeProps) => (
+                <CustomerIndex
+                  {...routeProps}
+                  createCustomer={this.putCustomer}
+                  getCustomer={this.getCustomer}
+                  removeCustomer={this.removeCustomer}
+                  searchField={this.state.searchField}
                 />
-                <Route
-                  exact
-                  path="/ticket/:ticketId/:colorId"
-                  render={(routeProps) => (
-                    <Page>
-                      <MonoTicket
-                        colorId={routeProps.match.params.colorId}
-                        ticket={generateTicket(
-                          this.findTicket(routeProps.match.params.ticketId)
-                        )}
-                        {...routeProps}
-                      />
-                    </Page>
-                  )}
+              )}
+            />
+            <Route
+              path="/customers/:id"
+              render={(routeProps) => (
+                <Customer
+                  {...routeProps}
+                  tickets={this.state.tickets}
+                  customer={this.state.customer}
+                  customerTickets={this.state.customerTickets}
+                  getCustomer={this.getCustomer}
+                  removeTicket={this.removeTicket}
+                  putTicket={this.putTicket}
+                  ticket={this.state.ticket}
+                  pushTicketToState={this.pushTicketToState}
+                  saveCustomer={this.updateCustomer}
                 />
-                <Route
-                  exact
-                  path="/ticket/:id"
-                  render={(routeProps) => (
-                    <Page>
-                      <Ticket
-                        ticket={generateTicket(
-                          this.findTicket(routeProps.match.params.id)
-                        )}
-                      />
-                    </Page>
-                  )}
+              )}
+            />
+            <Route
+              exact
+              path="/tickets"
+              render={(routeProps) => (
+                <TicketIndex
+                  {...routeProps}
+                  removeTicket={this.removeTicket}
+                  getTicket={this.getTicket}
+                  searchField={this.state.searchField}
+                  customers={this.state.customers}
+                  createTicket={this.putTicket}
                 />
-                <Route
-                  exact
-                  path="/customer/new"
-                  render={(routeProps) => (
-                    <Page>
-                      <NewCustomerForm
-                        saveCustomer={this.saveCustomer}
-                        tickets={this.state.tickets}
-                        {...routeProps}
-                      />
-                    </Page>
-                  )}
+              )}
+            />
+            <Route
+              path="/tickets/:id"
+              render={(routeProps) => (
+                <Ticket
+                  updateOrigin={this.updateTicketOrigin}
+                  customer={this.getCustomer}
+                  customers={this.state.customers}
+                  removeTicket={this.removeTicket}
+                  ticket={this.state.ticket}
+                  tickets={this.state.tickets}
+                  {...routeProps}
+                  ticketNotes={this.state.ticketNotes}
+                  removeNote={this.removeNote}
+                  putNote={this.putNote}
+                  saveTicket={this.updateTicket}
+                  updateNote={this.updateNote}
                 />
-                <Route
-                  exact
-                  path="/"
-                  render={(routeProps) => (
-                    <Page>
-                      <TicketIndex
-                        tickets={this.state.tickets}
-                        {...routeProps}
-                        deleteTicket={this.deleteTicket}
-                      />
-                    </Page>
-                  )}
+              )}
+            />
+            <Route
+              exact
+              path="/notes"
+              render={(routeProps) => (
+                <NoteIndex
+                  {...routeProps}
+                  createNote={this.putNote}
+                  tickets={this.state.tickets}
+                  getTicket={this.getTicket}
+                  removeNote={this.removeNote}
+                  searchField={this.state.searchField}
                 />
-                <Route
-                  exact
-                  path="/customer/:id"
-                  render={(routeProps) => (
-                    <Page>
-                      <Customer
-                        {...routeProps}
-                        tickets={this.state.tickets}
-                        customer={this.state.customer}
-                        customers={this.state.customers}
-                        findCustomer={this.findCustomer}
-                        newTicket={this.saveTicket}
-                      />
-                    </Page>
-                  )}
-                />
-                <Route
-                  exact
-                  path="/customer"
-                  render={(routeProps) => (
-                    <Page>
-                      <CustomerIndex
-                        deleteCustomer={this.deleteCustomer}
-                        customers={this.state.customers}
-                        {...routeProps}
-                      />
-                    </Page>
-                  )}
-                />
-              </Switch>
-            </CSSTransition>
-          </TransitionGroup>
-        )}
-      />
+              )}
+            />
+            <Route
+              path="/customers/:id"
+              children={<Customer note={this.state.note} />}
+            />
+          </Switch>
+          <Footer />
+        </div>
+      </Router>
     );
   }
 }
