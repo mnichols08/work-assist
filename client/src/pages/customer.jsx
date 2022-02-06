@@ -13,22 +13,21 @@ class Customer extends Component {
     this.state = {
       customer: { name: "loading..." },
       customerTickets: [],
-      customerName: '',
       tickets: [],
       ticket: {},
-      showEditField: { name: false, phone: false },
+      showEditField: { name: false, phone: false }
     };
     this.handleDelete = this.handleDelete.bind(this);
     this.newTicket = this.newTicket.bind(this);
     this.showNameEdit = this.showNameEdit.bind(this);
     this.showPhoneEdit = this.showPhoneEdit.bind(this);
-    this.saveCustomer = this.saveCustomer.bind(this)
+    this.saveCustomer = this.saveCustomer.bind(this);
   }
   showPhoneEdit() {
     this.setState({ showEditField: { phone: true } });
   }
   showNameEdit() {
-    this.setState({ showEditField: { name: true } });
+    this.setState({ showEditField: {name: true }});
   }
   handleDelete(id) {
     this.props.removeTicket(id);
@@ -55,16 +54,17 @@ class Customer extends Component {
     });
     this.props.history.push(`/tickets/${ticket._id}`);
   }
-  saveCustomer(input){
+  async saveCustomer(input){
     input.stopPropagation()
     input.preventDefault()
+    let customer
     if (input.target.name){
-
-    const customer = this.props.saveCustomer({name: input.target.name.value}, this.state.customer._id)
+    customer = await this.props.saveCustomer({name: input.target.name.value}, this.state.customer._id)
+    this.setState({ customer: customer.customer, showEditField: {name: false}} );
   }
-    if (input.target.phone) {
-
-      this.props.saveCustomer({phone: input.target.phone.value}, this.state.customer._id)
+    else if (input.target.phone) {
+     customer =  await this.props.saveCustomer({phone: input.target.phone.value}, this.state.customer._id)
+      this.setState({  customer: customer.customer, showEditField: {phone: false}});
     }
     
   }
@@ -80,7 +80,6 @@ class Customer extends Component {
         this.setState({
           customer: blob.customer,
           customerTickets: blob.customerTickets,
-          customerName: blob.customer.name,
           tickets: blob,
         })
       );
@@ -94,7 +93,7 @@ class Customer extends Component {
         {this.state.showEditField.name === true ||
         this.state.customer.name === undefined ? (
           <h1><form onSubmit={this.saveCustomer}>
-            <input type="text" name="name" defaultValue={this.state.customerName} placeholder={this.state.customerName || 'Customer Name'} /><button type="submit">Save</button>
+            <input type="text" name="name" defaultValue={this.state.customer.name} placeholder={this.state.customer.name || 'Customer Name'} /><button type="submit">Save</button>
           </form>
           </h1>
         ) : (
