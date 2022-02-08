@@ -7,11 +7,13 @@ import {
   useParams,
 } from "react-router-dom";
 import { SearchBox } from "./search-box/search-box.component";
+import AppNav from '../../components/app-nav'
 import "./header.css";
 
 class Header extends Component {
   constructor(props) {
     super(props);
+    this.state = {loggedIn: false}
     this.handleChange = this.handleChange.bind(this);
   }
   handleChange = (e) => {
@@ -31,25 +33,8 @@ class Header extends Component {
             searchFor={this.props.getSearchFor}
           />
         </div>
-        <nav>
-          <Link
-            onClick={this.props.setCustomers}
-            to="/customers"
-            className="App-link"
-          >
-            Customers
-          </Link>{" "}
-          <Link
-            onClick={this.props.setTickets}
-            to="/tickets"
-            className="App-link"
-          >
-            Tickets
-          </Link>{" "}
-          <Link onClick={this.props.setNotes} to="/notes" className="App-link">
-            Notes
-          </Link>
-        </nav>
+        {this.state.LoggedIn ? <AppNav setCustomers={this.props.setCustomers} setTickets={this.props.setCustomers} setNotes={this.props.setNotes}/> : 'logiin'}
+        
       </header>
     );
   }

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router";
 
+import GoogleSignIn from '../components/google-sign-in'
 import "./index.css";
 
 class IndexPage extends Component {
@@ -28,6 +29,7 @@ class IndexPage extends Component {
         <p>
           Use the menu on top to navigate and to use the app, just create a customer, ticket, or note by browsing over and creating one at the index page.
         </p>
+        <GoogleSignIn />
       </main>
     );
   }

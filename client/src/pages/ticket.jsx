@@ -8,6 +8,10 @@ import {
 } from "react-router-dom";
 
 import "./ticket.css";
+
+import TicketsPage from '../components/tickets-page'
+import AssignCustomer from '../components/assign-customer'
+import SaveTicket from '../components/save-ticket'
 const CLIENT_API = null;
 class Ticket extends Component {
   constructor(props) {
@@ -165,19 +169,7 @@ class Ticket extends Component {
             )}
             {this.state.showEditField.assignCustomer === true ||
             this.state.ticket.origin === undefined ? (
-              <form onSubmit={this.assignCustomer}>
-                <select name="customer" defaultValue="Assign Customer">
-                  <option key="placeholder" disabled>
-                    Assign Customer
-                  </option>
-                  {this.props.customers.map((customer) => (
-                    <option key={customer._id} value={customer._id}>
-                      {customer.name}
-                    </option>
-                  ))}
-                </select>
-                <button type="submit">Assign</button>
-              </form>
+              <AssignCustomer assignCustomer={this.assignCustomer} customers={this.props.customers} />
             ) : (
               <form onSubmit={this.showAssignCustomer}>
                 <button type="submit">Assign Different</button>
@@ -187,17 +179,7 @@ class Ticket extends Component {
           {this.state.ticket.title === undefined ||
           this.state.ticket.title === "" ||
           this.state.showEditField.title === true ? (
-            <h1>
-              <form onSubmit={this.saveTicket}>
-                <input
-                  placeholder={title ? title : "title"}
-                  name="title"
-                  defaultValue={this.state.ticket.title}
-                />
-                <button type="submit">Save</button>
-                <button onClick={this.cancelTitle}>Cancel</button>
-              </form>
-            </h1>
+            <SaveTicket onSubmit={this.saveTicket} title cancelTitle={this.cancelTitle} ticket={this.state.ticket} />
           ) : (
             <h1>
               {title}{" "}
@@ -249,61 +231,7 @@ class Ticket extends Component {
             </Link>
           </h2>
         )}
-        <div className="tickets page">
-          <h3>Notes</h3>
-          {ticketNotes.map((note) => (
-            <div key={note._id}>
-              <h4>
-                {this.state.showEditField.note === true && this.state.noteID == note._id ? (
-                  <form onSubmit={this.updateNote} id={note._id}>
-                    <input defaultValue={note.title} type="text" name="title" placeholder="enter a note" />
-                <select name="type" id="type">
-                  <option value="note">Note</option>
-                  <option value="todo" disabled>
-                    To Do
-                  </option>
-                </select>
-                <br />
-                <textarea
-                  defaultValue={note.context}
-                  name="context"
-                  placeholder="provide some more detail (optional)"
-                ></textarea>
-                <button type="submit">Submit</button>
-                <button onClick={this.cancelEditNote}>Cancel</button>
-                  </form>
-                ) : (
-                  <>{note.title} <br/>
-                  {note.context}</>
-                )}{" "}
-                <Link to="#" onClick={() => this.showEditNote(note._id)}>{` / `}</Link> |{" "}
-                <Link
-                  to="#"
-                  onClick={() => this.deleteNote(note._id)}
-                >{` x `}</Link>{" "}
-              </h4>
-              
-            </div>
-          ))}
-          <form onSubmit={this.handleSubmit}>
-            <h4>Create Note</h4>
-      
-                <input type="text" name="title" placeholder="enter a note" />
-                <select name="type" id="type">
-                  <option value="note">Note</option>
-                  <option value="todo" disabled>
-                    To Do
-                  </option>
-                </select>
-                <br />
-                <textarea
-                  name="context"
-                  placeholder="provide some more detail (optional)"
-                ></textarea>
-                <button type="submit">Submit</button>{" "}
-     
-          </form>
-        </div>
+        <TicketsPage handleSubmit={this.handleSubmit} deleteNote={this.deleteNote} showEditNote={this.showEditNote} cancelEditNote={this.cancelEditNote} onSubmit={this.updateNote} ticketNotes={this.state.ticketNotes} noteID={this.state.noteID} showEditField={this.state.showEditField} />
       </div>
     );
   }
