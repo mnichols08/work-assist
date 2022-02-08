@@ -8,6 +8,7 @@
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
     "cra-template": "1.1.3",
+    "firebase": "^9.6.6",
     "react": "latest",
     "react-dom": "latest",
     "react-google-login": "^5.2.2",
