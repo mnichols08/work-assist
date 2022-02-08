@@ -1,6 +1,6 @@
 import React from 'react'
 import { GoogleLogin, GoogleLogout } from 'react-google-login'
-const CLIENT_ID = '766626669832-pdrt94d14jeee5n7m85evhukjs3lhb5v.apps.googleusercontent.com'
+const CLIENT_ID = ''
 class GoogleSignIn extends React.Component {
   constructor(props) {
    super(props);
