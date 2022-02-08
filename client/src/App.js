@@ -18,40 +18,6 @@ import Ticket from "./pages/ticket";
 import NoteIndex from "./pages/notes";
 import "./App.css";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCco2Fb-0VuVDQBs8qrzY84TItKQEh9GoA",
-  authDomain: "work-assist-338900.firebaseapp.com",
-  projectId: "work-assist-338900",
-  storageBucket: "work-assist-338900.appspot.com",
-  messagingSenderId: "766626669832",
-  appId: "1:766626669832:web:a9efb820c08a293272f8bd"
-};
-
-
-const provider = new GoogleAuthProvider();
-provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-auth.languageCode = 'it';
-
-signInWithPopup(auth, provider)
-  .then((result) => {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential.accessToken;
-    // The signed-in user info.
-    const user = result.user;
-    // ...
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.email;
-    // The AuthCredential type that was used.
-    const credential = GoogleAuthProvider.credentialFromError(error);
-    // ...
-  });
 
 const CLIENT_API = process.env.CLIENT_API || null;
 class App extends Component {
@@ -69,7 +35,6 @@ class App extends Component {
       notes: [],
       searchFor: "",
       searchField: "",
-      app
     };
 
     this.setCustomerID = this.setCustomerID.bind(this);
