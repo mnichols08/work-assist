@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import CreateTicket from '../components/create-ticket'
-
+const CLIENT_API = process.env.REACT_APP_CLIENT_API
 class TicketIndex extends Component {
   constructor(props) {
     super(props);
@@ -53,7 +53,12 @@ class TicketIndex extends Component {
   }
  
   componentDidMount() {
-    fetch("/tickets")
+    fetch("/tickets", {
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => response.json())
       .then((blob) => this.setState({ tickets: blob.data }));
   }

@@ -13,27 +13,29 @@ import "./header.css";
 class Header extends Component {
   constructor(props) {
     super(props);
-    this.state = {loggedIn: false}
+    this.state = {loggedIn: this.props.loggedIn}
     this.handleChange = this.handleChange.bind(this);
   }
   handleChange = (e) => {
     this.props.setSearch(e.target.value);
   };
-  render() {
 
+  render() {
     return (
       <header className="App-header">
         <div>
           <Link to="/" onClick={this.props.resetSearch}>
             <code>tick.it</code>
           </Link>
-          <SearchBox
+          {this.props.loggedIn ? <SearchBox
             placeholder={`Search ${this.props.getSearchFor}`}
             handleChange={this.handleChange}
             searchFor={this.props.getSearchFor}
-          />
+          /> : null }
         </div>
-        {this.state.LoggedIn ? <AppNav setCustomers={this.props.setCustomers} setTickets={this.props.setCustomers} setNotes={this.props.setNotes}/> : 'logiin'}
+        {this.props.loggedIn ? <AppNav setCustomers={this.props.setCustomers} setTickets={this.props.setCustomers} setNotes={this.props.setNotes}/> : <Link className="App-link login" to="/login">
+            Login
+          </Link>}
         
       </header>
     );

@@ -16,10 +16,10 @@ import Customer from "./pages/customer";
 import TicketIndex from "./pages/tickets";
 import Ticket from "./pages/ticket";
 import NoteIndex from "./pages/notes";
+import GoogleSignIn from "./components/google-sign-in";
 import "./App.css";
 
-
-const CLIENT_API = process.env.CLIENT_API || null;
+const CLIENT_API = process.env.REACT_APP_CLIENT_API || null;
 class App extends Component {
   constructor(props) {
     super(props);
@@ -35,6 +35,9 @@ class App extends Component {
       notes: [],
       searchFor: "",
       searchField: "",
+      loggedIn: false,
+      user: {},
+      accessToken: "",
     };
 
     this.setCustomerID = this.setCustomerID.bind(this);
@@ -56,7 +59,15 @@ class App extends Component {
     this.putNote = this.putNote.bind(this);
     this.setSearch = this.setSearch.bind(this);
     this.resetSearch = this.resetSearch.bind(this);
-    this.updateNote = this.updateNote.bind(this)
+    this.updateNote = this.updateNote.bind(this);
+    this.login = this.login.bind(this);
+    this.logout = this.logout.bind(this);
+  }
+  login(user, loggedIn, accessToken) {
+    this.setState(user, loggedIn, accessToken);
+  }
+  logout() {
+    this.setState({ user: undefined, loggedIn: false, accessToken: "" });
   }
   resetSearch() {
     this.setState({ searchFor: "" });
@@ -170,7 +181,7 @@ class App extends Component {
       .then((blob) => blob.data);
   }
   async updateTicket(newTicket, id) {
-    const plusId = id.length > 0 ? `/${id}` : null
+    const plusId = id.length > 0 ? `/${id}` : null;
     const ticket = await fetch("/tickets" + plusId, {
       method: "PATCH",
       headers: {
@@ -180,15 +191,17 @@ class App extends Component {
       body: JSON.stringify(newTicket),
     })
       .then((response) => response.json())
-      .then((blob) => blob.ticket)
-      ;
-
-    this.setState( ticket );
+      .then((blob) => blob.ticket);
+    this.setState(ticket);
 
     return ticket;
   }
   async updateTicketOrigin(ticketID, customerID) {
-    if (customerID !== 'Assign Customer' || customerID !== null || customerID !== '') {
+    if (
+      customerID !== "Assign Customer" ||
+      customerID !== null ||
+      customerID !== ""
+    ) {
       const newState = await fetch(`/tickets/${ticketID}/${customerID}`, {
         method: "PATCH",
         headers: {
@@ -198,12 +211,21 @@ class App extends Component {
       })
         .then((response) => response.json())
         .then((blob) => {
-          return {customers: blob.customers, tickets: blob.tickets, ticket: blob.ticket, customer: blob.customer};
+          return {
+            customers: blob.customers,
+            tickets: blob.tickets,
+            ticket: blob.ticket,
+            customer: blob.customer,
+          };
         });
-        this.setState({ticket: newState.ticket, tickets: newState.tickets, customers: newState.customers })
-        console.log(newState)
-        return newState
-      }
+      this.setState({
+        ticket: newState.ticket,
+        tickets: newState.tickets,
+        customers: newState.customers,
+      });
+      console.log(newState);
+      return newState;
+    }
   }
   async removeTicket(id) {
     const newState = await fetch("/tickets/" + id, {
@@ -238,12 +260,14 @@ class App extends Component {
           customerTickets: blob.customerTickets,
           tickets: blob.tickets,
           ticket: blob.ticket,
-          customers: blob.customers
+          customers: blob.customers,
         };
       });
-      console.log(newState)
-    this.setState({customers: newState.customers, customerTickets: newState.customerTickets})
-    
+    this.setState({
+      customers: newState.customers,
+      customerTickets: newState.customerTickets,
+    });
+
     return newState;
   }
   pushTicketToState(ticket) {
@@ -291,13 +315,13 @@ class App extends Component {
     })
       .then((response) => response.json())
       .then((blob) => blob);
-      
+
     return createNote;
   }
 
   async updateNote(newNote, id) {
-    console.log(newNote, id)
-    const plusId = id.length > 0 ? `/${id}` : null
+    console.log(newNote, id);
+    const plusId = id.length > 0 ? `/${id}` : null;
     const note = await fetch("/notes" + plusId, {
       method: "PATCH",
       headers: {
@@ -307,14 +331,26 @@ class App extends Component {
       body: JSON.stringify(newNote),
     })
       .then((response) => response.json())
-      .then((blob) => blob)
-      ;
-    this.setState( {note: note.note, notes: note.notes, ticketNotes: note.ticketNotes} );
-      return {note: note.note, notes: note.notes, ticketNotes: note.ticketNotes};
+      .then((blob) => blob);
+    this.setState({
+      note: note.note,
+      notes: note.notes,
+      ticketNotes: note.ticketNotes,
+    });
+    return {
+      note: note.note,
+      notes: note.notes,
+      ticketNotes: note.ticketNotes,
+    };
   }
 
   componentDidMount() {
-    fetch("/open")
+    fetch("/open", {
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      }
+    })
       .then((response) => response.json())
       .then((blob) =>
         this.setState({
@@ -326,7 +362,6 @@ class App extends Component {
   }
 
   render() {
-    console.log(this.state)
     return (
       <Router>
         <div className="App">
@@ -338,14 +373,21 @@ class App extends Component {
             resetSearch={this.resetSearch}
             getSearchFor={this.state.searchFor}
             setSearch={this.setSearch}
+            user={this.state.user}
+            loggedIn={this.state.loggedIn}
+            accessToken={this.state.accessToken}
           />
           <Switch>
+            <Route exact path="/" children={<IndexPage login={this.login} />} />
             <Route
               exact
-              path="/"
-              children={<IndexPage createCustomer={this.putCustomer} />}
+              path="/login"
+              children={
+                <GoogleSignIn logout={this.logout} login={this.login} />
+              }
             />
-            <Route
+            {this.state.loggedIn ? <>
+              <Route
               exact
               path="/customers"
               render={(routeProps) => (
@@ -363,9 +405,8 @@ class App extends Component {
               render={(routeProps) => (
                 <Customer
                   {...routeProps}
-                  tickets={this.state.tickets}
-                  customer={this.state.customer}
                   customerTickets={this.state.customerTickets}
+                  tickets={this.state.tickets}
                   getCustomer={this.getCustomer}
                   removeTicket={this.removeTicket}
                   putTicket={this.putTicket}
@@ -381,6 +422,7 @@ class App extends Component {
               render={(routeProps) => (
                 <TicketIndex
                   {...routeProps}
+                  tickets={this.state.tickets}
                   removeTicket={this.removeTicket}
                   getTicket={this.getTicket}
                   searchField={this.state.searchField}
@@ -426,6 +468,7 @@ class App extends Component {
               path="/customers/:id"
               children={<Customer note={this.state.note} />}
             />
+            </> : <h1>Error 401: Unauthorized Access</h1>}
           </Switch>
           <Footer />
         </div>

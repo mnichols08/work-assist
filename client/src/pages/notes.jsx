@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 
 import "./notes.css";
+const CLIENT_API = process.env.REACT_APP_CLIENT_API
 class NoteIndex extends Component {
   constructor(props) {
     super(props);
@@ -51,7 +52,12 @@ class NoteIndex extends Component {
     });
   }
   componentDidMount() {
-    fetch("/notes")
+    fetch("/notes", {
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => response.json())
       .then((blob) =>
         this.setState({ notes: blob.data, searchField: this.props.searchField })

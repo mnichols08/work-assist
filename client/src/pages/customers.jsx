@@ -7,6 +7,8 @@ import {
   useParams,
 } from "react-router-dom";
 
+const CLIENT_API = process.env.REACT_APP_CLIENT_API
+
 class CustomerIndex extends Component {
   constructor(props) {
     super(props);
@@ -42,7 +44,12 @@ class CustomerIndex extends Component {
     });
   }
   componentDidMount() {
-    fetch("/customers")
+    fetch("/customers", {
+      headers: {
+        authkey: CLIENT_API,
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => response.json())
       .then((blob) => this.setState({ customers: blob.data }));
   }

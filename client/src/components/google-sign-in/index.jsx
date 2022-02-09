@@ -1,6 +1,6 @@
 import React from 'react'
 import { GoogleLogin, GoogleLogout } from 'react-google-login'
-const CLIENT_ID = ''
+const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID
 class GoogleSignIn extends React.Component {
   constructor(props) {
    super(props);
@@ -24,6 +24,7 @@ class GoogleSignIn extends React.Component {
        profile: response.profileObj
      }));
    }
+   this.props.login({loggedIn: true, accessToken: response.accessToken, user: response.profileObj})
  }
 
  logout (response) {
@@ -31,20 +32,22 @@ class GoogleSignIn extends React.Component {
      isLoggedIn: false,
      accessToken: ''
    }));
+   this.props.logout()
  }
 
  handleLoginFailure (response) {
-   alert('Failed to log in')
+   console.error('Failed to log in')
  }
 
  handleLogoutFailure (response) {
-   alert('Failed to log out')
+   console.error('Failed to log out')
  }
 
  render() {
-     console.log(this.state)
    return (
    <div>
+       <h1>Log In</h1>
+       <p>Use Google (for now) to log in to the app.</p>
      { this.state.isLoggedIn ?
        <GoogleLogout
          clientId={ CLIENT_ID }
@@ -61,7 +64,7 @@ class GoogleSignIn extends React.Component {
          responseType='code,token'
        />
      }
-     { this.state.accessToken ? <h5>{['hey there, ', 'hello ', 'well hi, ', 'welcome '][Math.floor(Math.random() * 4)] + this.state.profile.givenName }</h5> : null }
+     { this.state.accessToken ? <h5>{[`Good ${new Date().getHours() > 3 && new Date().getHours() < 12 ? 'Morning ' : new Date().getHours() > 12 && new Date().getHours() < 18 ? 'Afternoon ' : 'Evening ' }`,'Hey there, ', 'Hello ', 'Well hi, ', 'Welcome '][Math.floor(Math.random() * 5)] + this.state.profile.givenName }</h5> : null }
 
    </div>
    )

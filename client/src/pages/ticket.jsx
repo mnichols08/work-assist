@@ -12,7 +12,7 @@ import "./ticket.css";
 import TicketsPage from '../components/tickets-page'
 import AssignCustomer from '../components/assign-customer'
 import SaveTicket from '../components/save-ticket'
-const CLIENT_API = null;
+const CLIENT_API = process.env.REACT_APP_CLIENT_API || null;
 class Ticket extends Component {
   constructor(props) {
     super(props);

@@ -44,4 +44,6 @@ header {
     height: 10em;
 }
 
-
+.App-link.login {
+    margin-right: 1%;
+}

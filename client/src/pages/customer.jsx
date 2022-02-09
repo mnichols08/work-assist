@@ -6,12 +6,12 @@ import {
   Link,
   useParams,
 } from "react-router-dom";
-const CLIENT_API = null;
+const CLIENT_API = process.env.REACT_APP_CLIENT_API;
 class Customer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      customer: { name: "loading..." },
+      customer: {},
       customerTickets: [],
       tickets: [],
       ticket: {},
@@ -68,8 +68,8 @@ class Customer extends Component {
     }
     
   }
-  componentDidMount() {
-    fetch("/customers/" + this.props.match.params.id, {
+  async componentDidMount() {
+    await fetch("/customers/" + this.props.match.params.id, {
       method: "GET",
       headers: {
         authkey: CLIENT_API,
@@ -83,10 +83,9 @@ class Customer extends Component {
           tickets: blob,
         })
       );
+
   }
-  componentDidUpdate() {
-    this.setState();
-  }
+
   render() {
     return (
       <div className="index" id={this.state.customer._id}>
