@@ -1,5 +1,5 @@
 {
-  "name": "client-two",
+  "name": "tick-it-client",
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:3001/",
@@ -13,9 +13,19 @@
     "react": "latest",
     "react-dom": "latest",
     "react-google-login": "^5.2.2",
+    "react-redux": "^7.2.6",
     "react-router-dom": "^5.3.0",
     "react-scripts": "latest",
-    "web-vitals": "^2.1.4"
+    "reselect": "^4.1.5",
+    "styled-components": "^5.3.3",
+    "axios": "^0.21.1",
+    "node-sass": "^6.0.0",
+    "react-stripe-checkout": "^2.6.3",
+    "react-test-renderer": "^17.0.2",
+    "redux": "^4.1.0",
+    "redux-logger": "^3.0.6",
+    "redux-persist": "^6.0.0",
+    "redux-saga": "^1.1.3"
   },
   "scripts": {
     "start": "react-scripts start",
